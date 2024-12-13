@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Registration page for Online Clipboard">
+    <meta name="keywords" content="register, clipboard, online">
+    <title>Register - Online Clipboard</title>
+
+    <!-- TailwindCSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+
+    <!-- Registration Form -->
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 class="text-2xl font-bold text-center mb-4">Register</h2>
+        <form id="registerForm">
+            <!-- Username Input -->
+            <label for="username" class="block text-gray-700">Username</label>
+            <input type="text" id="username" class="w-full p-2 border rounded mb-4" placeholder="Enter your username" required>
+
+            <!-- Password Input -->
+            <label for="password" class="block text-gray-700">Password</label>
+            <div class="relative">
+                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
+                <button type="button" id="togglePassword" class="absolute right-2 top-3 text-gray-500">
+                    <i id="passwordIcon" class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <!-- Confirm Password Input -->
+            <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
+            <input type="password" id="confirmPassword" class="w-full p-2 border rounded mb-4" placeholder="Confirm your password" required>
+
+            <!-- Submit Button -->
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Register</button>
+        </form>
+
+        <!-- Redirect to Login -->
+        <p class="mt-4 text-center">Already have an account? <a href="/login.html" class="text-blue-500">Login</a></p>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="register.js"></script>
+</body>
+</html>
