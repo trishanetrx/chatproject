@@ -1,25 +1,5 @@
 const apiUrl = 'https://negombotech.com/api';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleButton = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    const passwordIcon = document.getElementById('passwordIcon');
-
-    if (toggleButton && passwordInput && passwordIcon) {
-        toggleButton.addEventListener('click', () => {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordIcon.classList.remove('fa-eye');
-                passwordIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordIcon.classList.remove('fa-eye-slash');
-                passwordIcon.classList.add('fa-eye');
-            }
-        });
-    }
-});
-
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -48,8 +28,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
         if (response.ok) {
             showNotification('Registration successful! Redirecting...', 'success');
-
-            // Redirect after a short delay
             setTimeout(() => {
                 window.location.href = '/login.html';
             }, 2000);
@@ -62,7 +40,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     }
 });
 
-// Function to display notifications
 function showNotification(message, type) {
     const notification = document.createElement('div');
     notification.textContent = message;
@@ -72,7 +49,6 @@ function showNotification(message, type) {
 
     document.body.appendChild(notification);
 
-    // Automatically remove the notification after 3 seconds
     setTimeout(() => {
         notification.remove();
     }, 3000);
