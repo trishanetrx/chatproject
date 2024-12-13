@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Public chat room by VentiqoTech">
+    <title>Chat Room - VentiqoTech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-gray-100 font-roboto">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-4">
+        <h1 class="text-2xl font-bold text-center">Public Chat Room</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex h-screen">
+        <!-- User List -->
+        <aside class="w-1/4 bg-gray-200 p-4 overflow-y-auto">
+            <h2 class="text-lg font-semibold mb-4">Online Users</h2>
+            <ul id="userList" class="list-disc pl-5">
+                <!-- Dynamically populated user list -->
+            </ul>
+        </aside>
+
+        <!-- Chat Section -->
+        <section class="flex-1 flex flex-col">
+            <!-- Messages -->
+            <div id="messages" class="flex-1 p-4 overflow-y-auto border-b">
+                <!-- Chat messages will appear here -->
+            </div>
+
+            <!-- Input -->
+            <div class="p-4">
+                <form id="messageForm" class="flex space-x-4">
+                    <input type="text" id="messageInput" class="flex-1 p-3 border rounded" placeholder="Type a message..." required>
+                    <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-700">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center p-2">
+        <button id="logoutButton" class="bg-red-500 px-4 py-2 rounded hover:bg-red-700">Logout</button>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        const socket = io(); // Connect to the WebSocket server
+        const userList = document.getElementById('userList');
+        const messages = document.getElementById('messages');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+
+        // Emit event when user joins
+        const username = prompt("Enter your username:");
+        socket.emit('join', username);
+
+        // Update the user list
+        socket.on('updateUserList', (users) => {
+            userList.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = user;
+                userList.appendChild(li);
+            });
+        });
+
+        // Display incoming messages
+        socket.on('message', (data) => {
+            const div = document.createElement('div');
+            div.textContent = `${data.username}: ${data.message}`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight; // Auto-scroll to the bottom
+        });
+
+        // Send messages
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value;
+            if (message.trim()) {
+                socket.emit('message', { username, message });
+                messageInput.value = '';
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            alert('Logged out successfully!');
+            window.location.href = '/login.html';
+        });
+    </script>
+</body>
+</html>
