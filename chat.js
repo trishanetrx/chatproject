@@ -48,13 +48,25 @@ emojiButton.addEventListener('click', () => {
 
 // Update User List
 socket.on('updateUserList', (users) => {
-    userList.innerHTML = '';
+    userList.innerHTML = ''; // Clear the list before updating
     users.forEach((user) => {
         const li = document.createElement('li');
-        li.textContent = user;
-        userList.appendChild(li);
+        li.textContent = user; // Assign username to the list item text
+
+        // Optional: Add additional UI elements or buttons if required
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'X';
+        removeButton.onclick = () => {
+            alert(`Feature not implemented yet for removing: ${user}`);
+        };
+
+        li.appendChild(removeButton); // Attach button to list item
+        userList.appendChild(li);    // Add list item to the DOM
     });
 });
+
+// Ensure socket connection emits a request for the current user list upon page load
+socket.emit('requestUserList');
 
 // Display Messages
 socket.on('message', (data) => {
