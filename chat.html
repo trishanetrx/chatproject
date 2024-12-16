@@ -166,6 +166,33 @@
         form button:hover {
             background-color: #0056b3;
         }
+    
+    /* Highlight Effect with Transparency */
+    ::selection {
+        background: rgba(0, 123, 255, 0.3); /* Subtle blue transparency */
+        color: white; /* Optional: Keep the text color visible */
+    }
+
+    /* Message Styles */
+    .message {
+        max-width: 70%;
+        padding: 10px;
+        border-radius: 6px;
+        margin: 5px 0;
+    }
+
+    .sender {
+        background-color: #007bff;
+        color: white;
+        align-self: flex-end;
+    }
+
+    .receiver {
+        background-color: #444;
+        color: #e0e0e0;
+        align-self: flex-start;
+    }
+    
     </style>
 </head>
 <body>
