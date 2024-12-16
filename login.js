@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = '/clipboard.html';
+                    window.location.href = '/chat.html';
                 }, 2000);
             } else {
                 // Display error message
