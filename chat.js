@@ -1,4 +1,4 @@
-const socket = io('https://api.negombotech.com');
+const socket = io('https://api.negombotech.com'); // Connect to WebSocket server
 
 const userList = document.getElementById('userList');
 const messages = document.getElementById('messages');
@@ -11,32 +11,31 @@ const logoutButton = document.getElementById('logoutButton');
 
 let ignoredUsers = JSON.parse(localStorage.getItem('ignoredUsers')) || [];
 
-// Dark Mode
+// Fix: Dark Mode Toggle
 darkModeToggle.addEventListener('click', () => {
     document.body.classList.toggle('dark');
 });
 
-// Logout Functionality
+// Fix: Logout Button
 logoutButton.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = '/login.html';
 });
 
-// Emoji Picker Initialization
+// Fix: Emoji Picker Rendering
 let pickerVisible = false;
 
 emojiButton.addEventListener('click', () => {
     if (!pickerVisible) {
+        emojiPickerContainer.classList.remove('hidden');
         const picker = new EmojiMart.Picker({
             set: 'apple',
             onEmojiSelect: (emoji) => {
                 messageInput.value += emoji.native;
             },
         });
-
-        emojiPickerContainer.innerHTML = '';
+        emojiPickerContainer.innerHTML = ''; // Clear previous picker
         emojiPickerContainer.appendChild(picker);
-        emojiPickerContainer.classList.remove('hidden');
         pickerVisible = true;
     } else {
         emojiPickerContainer.classList.add('hidden');
@@ -44,18 +43,19 @@ emojiButton.addEventListener('click', () => {
     }
 });
 
-// Update Online Users
+// Fix: Update Online Users
 socket.on('updateUserList', (users) => {
     userList.innerHTML = '';
     users.forEach((user) => {
         const li = document.createElement('li');
         li.textContent = user;
 
+        // Add Ignore/Unignore Button
         const button = document.createElement('button');
         button.textContent = ignoredUsers.includes(user) ? 'Unignore' : 'Ignore';
         button.addEventListener('click', () => {
             if (ignoredUsers.includes(user)) {
-                ignoredUsers = ignoredUsers.filter((ignored) => ignored !== user);
+                ignoredUsers = ignoredUsers.filter((u) => u !== user);
                 button.textContent = 'Ignore';
             } else {
                 ignoredUsers.push(user);
@@ -69,7 +69,7 @@ socket.on('updateUserList', (users) => {
     });
 });
 
-// Display Messages
+// Fix: Display Messages with Ignored User Filtering
 socket.on('message', (data) => {
     if (!ignoredUsers.includes(data.username)) {
         const div = document.createElement('div');
@@ -80,7 +80,7 @@ socket.on('message', (data) => {
     }
 });
 
-// Send Message
+// Fix: Send Message
 messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = messageInput.value.trim();
@@ -89,3 +89,11 @@ messageForm.addEventListener('submit', (e) => {
         messageInput.value = '';
     }
 });
+
+// Fix: Fetch Username from Local Storage
+const username = localStorage.getItem('username');
+if (username) {
+    socket.emit('join', username);
+} else {
+    window.location.href = '/login.html'; // Redirect to login if username is missing
+}
