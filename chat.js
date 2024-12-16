@@ -1,4 +1,4 @@
-const socket = io('https://negombotech.com'); // Connect to WebSocket backend
+const socket = io('https://api.negombotech.com'); // Updated to correct backend WebSocket URL
 
 const userList = document.getElementById('userList');
 const messages = document.getElementById('messages');
