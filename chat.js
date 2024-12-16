@@ -4,11 +4,10 @@ const userList = document.getElementById('userList');
 const messages = document.getElementById('messages');
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
-
-// Emoji Picker Initialization
 const emojiButton = document.getElementById('emojiButton');
 const emojiPickerContainer = document.getElementById('emojiPicker');
 
+// Emoji Picker Initialization
 let pickerVisible = false;
 
 emojiButton.addEventListener('click', () => {
@@ -16,24 +15,25 @@ emojiButton.addEventListener('click', () => {
         const picker = new EmojiMart.Picker({
             set: 'apple',
             onEmojiSelect: (emoji) => {
-                messageInput.value += emoji.native; // Append emoji to message input
+                messageInput.value += emoji.native; // Append emoji to input
             },
         });
 
-        emojiPickerContainer.innerHTML = '';
+        emojiPickerContainer.innerHTML = ''; // Clear previous picker
         emojiPickerContainer.appendChild(picker);
         emojiPickerContainer.classList.remove('hidden');
         pickerVisible = true;
     } else {
-        emojiPickerContainer.innerHTML = '';
         emojiPickerContainer.classList.add('hidden');
         pickerVisible = false;
     }
 });
 
-// Dark mode toggle
+// Dark Mode Toggle
 document.getElementById('darkModeToggle').addEventListener('click', () => {
     document.body.classList.toggle('dark');
+    const mode = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+    document.getElementById('darkModeToggle').textContent = mode;
 });
 
 // Retrieve username
@@ -64,7 +64,7 @@ socket.on('message', (data) => {
 
     setTimeout(() => {
         div.classList.add('show');
-    }, 10); // Delayed animation for smooth appearance
+    }, 10); // Smooth appearance animation
 
     messages.scrollTop = messages.scrollHeight; // Auto-scroll
 });
