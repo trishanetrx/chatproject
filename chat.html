@@ -20,39 +20,45 @@
             flex-direction: column;
         }
 
-        /* Dark Mode General */
-        body.dark {
-            background-color: #121212;
-            color: #e0e0e0;
+        /* Header with Image */
+        header {
+            background: url('togblueline.png') no-repeat center center;
+            background-size: cover;
+            height: 60px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
         }
 
-        body.dark header {
-            background-color: #1f2937;
+        /* User List Styling */
+        aside {
+            background: #f3f4f6;
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
         }
 
-        body.dark aside {
-            background-color: #1f2937;
-            color: #e0e0e0;
+        aside h2 {
+            margin-bottom: 10px;
         }
 
-        body.dark #messages {
-            background-color: #1e1e1e;
+        #userList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #e1e1e1;
+            border-radius: 6px;
+            margin-bottom: 8px;
         }
 
-        body.dark input, body.dark button {
-            background-color: #333333;
-            color: #e0e0e0;
-            border-color: #555;
-        }
-
-        body.dark .message.sender {
-            background: #2e3b4e;
-            color: #cfd8dc;
-        }
-
-        body.dark .message.receiver {
-            background: #3b3b3b;
-            color: #cfd8dc;
+        #userList button {
+            color: red;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
 
         /* Chat Bubbles */
@@ -61,14 +67,15 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            gap: 10px;
             padding: 15px;
             background: #f9f9f9;
         }
 
         .message {
             max-width: 60%;
-            padding: 8px 12px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
             margin: 4px 0;
         }
 
@@ -84,33 +91,11 @@
             color: #333;
         }
 
-        /* User List */
-        #userList li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        #userList button {
-            background: transparent;
-            color: red;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* Responsive Fix */
+        /* Responsive Layout */
         main {
             display: flex;
             flex: 1;
-            height: 100%;
-        }
-
-        aside {
-            width: 20%;
-            min-width: 250px;
-            background: #f3f4f6;
+            height: calc(100vh - 60px);
         }
 
         section {
@@ -124,41 +109,41 @@
             display: flex;
             gap: 10px;
             padding: 10px;
-            border-top: 1px solid #ccc;
+            border-top: 1px solid #ddd;
         }
 
         input {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 6px;
         }
 
         button {
-            padding: 10px;
+            padding: 8px 10px;
             border: none;
+            background: #007bff;
+            color: white;
             border-radius: 6px;
             cursor: pointer;
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <header class="bg-blue-600 text-white flex justify-between p-4">
+<body>
+    <!-- Header -->
+    <header>
         <h1 class="text-2xl font-bold">VentiqoTech Chat</h1>
         <div>
-            <button id="darkModeToggle" class="bg-gray-800 px-3 py-1 rounded hover:bg-gray-700">
-                Dark Mode
-            </button>
-            <button id="logoutButton" class="bg-red-500 px-3 py-1 rounded hover:bg-red-700">
-                Logout
-            </button>
+            <button id="darkModeToggle">Dark Mode</button>
+            <button id="logoutButton">Logout</button>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main>
         <!-- User List -->
         <aside>
-            <h2 class="text-lg font-semibold mb-3">Online Users</h2>
+            <h2>Online Users</h2>
             <ul id="userList"></ul>
         </aside>
 
@@ -170,11 +155,11 @@
             <form id="messageForm">
                 <button type="button" id="emojiButton">😊</button>
                 <input id="messageInput" type="text" placeholder="Type a message..." required />
-                <button type="submit" class="bg-blue-500 text-white">Send</button>
+                <button type="submit">Send</button>
             </form>
 
             <!-- Emoji Picker -->
-            <div id="emojiPicker" class="hidden absolute bottom-20 left-10 z-10"></div>
+            <div id="emojiPicker" class="hidden"></div>
         </section>
     </main>
 
