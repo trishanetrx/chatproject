@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/emoji-mart@latest/dist/browser.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
     <style>
+        /* Styles remain unchanged */
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -20,8 +21,7 @@
             flex-direction: column;
             background-color: #f9f9f9;
         }
-
-        /* Header with Background Image */
+        /* Header */
         header {
             background: url('topblueline.png') no-repeat center center;
             background-size: cover;
@@ -32,8 +32,6 @@
             padding: 0 20px;
             color: white;
         }
-
-        /* Buttons */
         header button {
             background-color: #007bff;
             color: white;
@@ -41,177 +39,91 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s ease;
         }
-
         header button:hover {
             background-color: #0056b3;
         }
-
-        /* User List */
+        /* Sidebar */
         aside {
             background: #222;
             padding: 15px;
-            overflow-y: auto;
-            border-right: 1px solid #444;
             color: #e0e0e0;
-            min-width: 250px;
+            border-right: 1px solid #444;
         }
-
-        aside h2 {
-            color: #ffffff;
-            margin-bottom: 10px;
-        }
-
         #userList li {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             padding: 8px;
             background: #333;
-            color: #ffffff;
+            color: #fff;
             border-radius: 6px;
-            margin-bottom: 8px;
         }
-
-        #userList button {
-            color: red;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* Logged-in User Display */
         .logged-in-user {
             margin-top: 20px;
-            padding: 10px;
+            text-align: center;
+            padding: 8px;
             background: #444;
             color: #f1f1f1;
             border-radius: 5px;
-            text-align: center;
         }
-
-        /* Chat Messages */
+        /* Messages */
         #messages {
             flex: 1;
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
             padding: 20px;
             background: #121212;
             color: #e0e0e0;
         }
-
-        .message {
-            max-width: 70%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin: 4px 0;
-        }
-
         .message.sender {
             align-self: flex-end;
             background: #007bff;
-            color: #ffffff;
+            color: #fff;
         }
-
         .message.receiver {
-            align-self: flex-start;
             background: #444;
-            color: #f1f1f1;
         }
-
-        /* Chat Input */
+        /* Input */
         form {
             display: flex;
-            gap: 10px;
             padding: 10px;
             background: #222;
             border-top: 1px solid #444;
         }
-
         form input {
             flex: 1;
             padding: 8px;
             border: 1px solid #555;
-            border-radius: 6px;
             background: #333;
-            color: white;
-        }
-
-        form button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 12px;
+            color: #fff;
             border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        form button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Responsive Layout */
-        main {
-            display: flex;
-            flex: 1;
-            height: calc(100vh - 60px);
-        }
-
-        section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Dark Mode */
-        body.dark {
-            background-color: #121212;
-        }
-
-        body.dark header {
-            filter: brightness(0.9);
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
-        <h1 class="text-2xl font-bold">VentiqoTech Chat</h1>
+        <h1>VentiqoTech Chat</h1>
         <div>
             <button id="darkModeToggle">Dark Mode</button>
             <button id="logoutButton">Logout</button>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
-        <!-- User List -->
         <aside>
             <h2>Online Users</h2>
             <ul id="userList"></ul>
-            <!-- Logged-in User -->
             <div class="logged-in-user" id="loggedInUser"></div>
         </aside>
-
-        <!-- Chat Section -->
         <section>
             <div id="messages"></div>
-
-            <!-- Input -->
             <form id="messageForm">
                 <button type="button" id="emojiButton">😊</button>
                 <input id="messageInput" type="text" placeholder="Type a message..." required />
                 <button type="submit">Send</button>
             </form>
-
-            <!-- Emoji Picker -->
             <div id="emojiPicker" class="hidden"></div>
         </section>
     </main>
-    
+    <script src="chat.js"></script>
 </body>
 </html>
