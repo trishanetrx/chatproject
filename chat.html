@@ -18,16 +18,35 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Smooth scroll for messages */
+        /* User List */
+        #userList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #userList button {
+            background: transparent;
+            border: none;
+            color: red;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        #userList button:hover {
+            color: darkred;
+        }
+
+        /* Chat bubbles */
         #messages {
-            scroll-behavior: smooth;
             display: flex;
             flex-direction: column;
             gap: 10px;
             padding: 10px;
         }
 
-        /* Chat bubbles */
         .message {
             max-width: 60%;
             padding: 8px 12px;
@@ -54,18 +73,13 @@
             color: #e0e0e0;
         }
 
-        body.dark .bg-blue-600 {
-            background-color: #1a237e;
-        }
-
-        body.dark .bg-gray-100 {
+        body.dark #userList {
             background-color: #2e2e2e;
         }
 
         body.dark input, body.dark button {
             background-color: #424242;
             color: #e0e0e0;
-            border-color: #555;
         }
 
         body.dark #messages .message.sender {
@@ -76,15 +90,6 @@
         body.dark #messages .message.receiver {
             background-color: #37474f;
             color: #cfd8dc;
-        }
-
-        /* Buttons */
-        button {
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            transform: scale(1.05);
         }
     </style>
 </head>
@@ -111,9 +116,7 @@
         <!-- Chat Section -->
         <section class="flex-1 flex flex-col bg-white">
             <!-- Messages -->
-            <div id="messages" class="flex-1 p-4 overflow-y-auto space-y-4">
-                <!-- Messages will be dynamically added here -->
-            </div>
+            <div id="messages" class="flex-1 p-4 overflow-y-auto space-y-4"></div>
 
             <!-- Input -->
             <div class="p-4 border-t relative">
@@ -135,8 +138,7 @@
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </form>
-
-                <!-- Emoji Picker Container -->
+                <!-- Emoji Picker -->
                 <div id="emojiPicker" class="hidden absolute bottom-16 left-4 z-10"></div>
             </div>
         </section>
