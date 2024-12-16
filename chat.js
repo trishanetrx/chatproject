@@ -11,7 +11,7 @@ const logoutButton = document.getElementById('logoutButton');
 const loggedInUserDisplay = document.getElementById('loggedInUser');
 
 // Get Username
-const username = localStorage.getItem('username') || 'Unknown';
+const username = localStorage.getItem('username') || 'Guest';
 loggedInUserDisplay.textContent = `Logged in as: ${username}`;
 
 // Dark Mode Toggle
@@ -27,12 +27,13 @@ logoutButton.addEventListener('click', () => {
 
 // Emoji Picker
 let pickerVisible = false;
+
 emojiButton.addEventListener('click', () => {
     if (!pickerVisible) {
         const picker = new EmojiMart.Picker({
             set: 'apple',
             onEmojiSelect: (emoji) => {
-                messageInput.value += emoji.native;
+                messageInput.value += emoji.native; // Append emoji to input field
             },
         });
         emojiPickerContainer.innerHTML = '';
