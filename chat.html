@@ -92,6 +92,8 @@
             color: white;
             border: none;
             cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 4px;
         }
 
         .logged-in-user {
@@ -137,6 +139,12 @@
             align-self: flex-start;
         }
 
+        /* Highlight Effect with Transparency */
+        ::selection {
+            background: rgba(0, 123, 255, 0.3);
+            color: white;
+        }
+
         /* Input Section */
         form {
             display: flex;
@@ -166,33 +174,17 @@
         form button:hover {
             background-color: #0056b3;
         }
-    
-    /* Highlight Effect with Transparency */
-    ::selection {
-        background: rgba(0, 123, 255, 0.3); /* Subtle blue transparency */
-        color: white; /* Optional: Keep the text color visible */
-    }
 
-    /* Message Styles */
-    .message {
-        max-width: 70%;
-        padding: 10px;
-        border-radius: 6px;
-        margin: 5px 0;
-    }
-
-    .sender {
-        background-color: #007bff;
-        color: white;
-        align-self: flex-end;
-    }
-
-    .receiver {
-        background-color: #444;
-        color: #e0e0e0;
-        align-self: flex-start;
-    }
-    
+        /* Emoji Picker */
+        #emojiPicker {
+            position: absolute;
+            bottom: 60px;
+            left: 10px;
+            z-index: 10;
+            background: #333;
+            border-radius: 5px;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -220,6 +212,7 @@
                 <input id="messageInput" type="text" placeholder="Type a message..." required />
                 <button type="submit">Send</button>
             </form>
+            <div id="emojiPicker" class="hidden"></div>
         </section>
     </main>
 
