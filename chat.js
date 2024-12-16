@@ -10,6 +10,9 @@ const darkModeToggle = document.getElementById('darkModeToggle');
 const logoutButton = document.getElementById('logoutButton');
 const loggedInUserDisplay = document.getElementById('loggedInUser');
 
+// Maintain a list of ignored users
+let ignoredUsers = [];
+
 // Get Username
 const username = localStorage.getItem('username') || 'Guest';
 loggedInUserDisplay.textContent = `Logged in as: ${username}`;
@@ -53,14 +56,20 @@ socket.on('updateUserList', (users) => {
         const li = document.createElement('li');
         li.textContent = user; // Assign username to the list item text
 
-        // Optional: Add additional UI elements or buttons if required
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'X';
-        removeButton.onclick = () => {
-            alert(`Feature not implemented yet for removing: ${user}`);
+        // Add "Ignore" button
+        const ignoreButton = document.createElement('button');
+        ignoreButton.textContent = 'Ignore';
+        ignoreButton.onclick = () => {
+            if (!ignoredUsers.includes(user)) {
+                ignoredUsers.push(user); // Add to ignored users list
+                alert(`${user} has been ignored.`);
+            } else {
+                ignoredUsers = ignoredUsers.filter((ignored) => ignored !== user); // Remove from ignored list
+                alert(`${user} is no longer ignored.`);
+            }
         };
 
-        li.appendChild(removeButton); // Attach button to list item
+        li.appendChild(ignoreButton); // Attach button to list item
         userList.appendChild(li);    // Add list item to the DOM
     });
 });
@@ -70,6 +79,9 @@ socket.emit('requestUserList');
 
 // Display Messages
 socket.on('message', (data) => {
+    // Ignore messages from ignored users
+    if (ignoredUsers.includes(data.username)) return;
+
     const div = document.createElement('div');
     div.classList.add('message');
     div.classList.add(data.username === username ? 'sender' : 'receiver');
