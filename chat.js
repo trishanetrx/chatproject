@@ -55,7 +55,7 @@ emojiButton.addEventListener('click', () => {
 
 // Update User List
 socket.on('updateUserList', (users) => {
-    console.log('Received user list:', users); // Debug to check the incoming list format
+    console.log('Received user list:', users); // Debugging line to verify incoming data
     userList.innerHTML = ''; // Clear the list before updating
 
     if (Array.isArray(users) && users.length > 0) {
@@ -63,16 +63,20 @@ socket.on('updateUserList', (users) => {
             const li = document.createElement('li');
             li.textContent = username; // Display the username directly
 
-            // Add "Ignore" button
+            // Add Ignore/Unignore button
             const ignoreButton = document.createElement('button');
-            ignoreButton.textContent = 'Ignore';
+            ignoreButton.textContent = ignoredUsers.includes(username) ? 'Unignore' : 'Ignore';
+
+            // Button click behavior
             ignoreButton.onclick = () => {
                 if (!ignoredUsers.includes(username)) {
                     ignoredUsers.push(username);
                     alert(`${username} has been ignored.`);
+                    ignoreButton.textContent = 'Unignore'; // Change button text to "Unignore"
                 } else {
                     ignoredUsers = ignoredUsers.filter((ignored) => ignored !== username);
                     alert(`${username} is no longer ignored.`);
+                    ignoreButton.textContent = 'Ignore'; // Change button text back to "Ignore"
                 }
             };
 
