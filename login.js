@@ -1,4 +1,4 @@
-const apiUrl = 'https://negombotech.com/api'; // Define the API base URL
+const apiUrl = 'https://api.negombotech.com/api'; // Backend base URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
