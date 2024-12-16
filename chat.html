@@ -29,8 +29,23 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 15px;
+            padding: 0 20px;
             color: white;
+        }
+
+        /* Buttons */
+        header button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        header button:hover {
+            background-color: #0056b3;
         }
 
         /* User List */
@@ -39,6 +54,7 @@
             padding: 15px;
             overflow-y: auto;
             border-right: 1px solid #ddd;
+            min-width: 250px;
         }
 
         #userList li {
@@ -49,6 +65,12 @@
             background: #e1e1e1;
             border-radius: 6px;
             margin-bottom: 8px;
+            color: #333;
+        }
+
+        body.dark #userList li {
+            background: #333;
+            color: #f1f1f1;
         }
 
         #userList button {
@@ -65,12 +87,12 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding: 15px;
+            padding: 20px;
             background: white;
         }
 
         .message {
-            max-width: 60%;
+            max-width: 70%;
             padding: 10px 12px;
             border-radius: 8px;
             margin: 4px 0;
@@ -88,23 +110,8 @@
             color: #333;
         }
 
-        /* Dark Mode Styling */
-        body.dark {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-
-        body.dark header {
-            filter: brightness(0.7);
-        }
-
-        body.dark aside {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-
         body.dark #messages {
-            background-color: #222222;
+            background: #222;
         }
 
         body.dark .message.sender {
@@ -115,6 +122,47 @@
         body.dark .message.receiver {
             background: #3b3b3b;
             color: #cfd8dc;
+        }
+
+        /* Chat Input */
+        form {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        body.dark form {
+            background: #1e1e1e;
+            border-color: #444;
+        }
+
+        form input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        body.dark form input {
+            background: #333;
+            color: white;
+            border-color: #555;
+        }
+
+        form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
         }
 
         /* Responsive Layout */
@@ -130,27 +178,14 @@
             flex-direction: column;
         }
 
-        form {
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            border-top: 1px solid #ddd;
+        /* Dark Mode */
+        body.dark {
+            background-color: #121212;
+            color: #e0e0e0;
         }
 
-        input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        button {
-            padding: 8px 10px;
-            border: none;
-            background: #007bff;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
+        body.dark header {
+            filter: brightness(0.9);
         }
     </style>
 </head>
