@@ -60,7 +60,7 @@ const io = new Server(server, {
 });
 
 // WebSocket Handlers
-const onlineUsers = new Set();
+const onlineUsers = new Map();
 
 io.on('connection', (socket) => {
     console.log('A user connected');
@@ -68,8 +68,8 @@ io.on('connection', (socket) => {
     // Handle joining a user
     socket.on('join', (username) => {
         socket.username = username;
-        onlineUsers.add(username);
-        io.emit('updateUserList', Array.from(onlineUsers));
+        onlineUsers.set(username, socket);
+        io.emit('updateUserList', Array.from(onlineUsers.keys()));
         console.log(`${username} joined the chat`);
     });
 
@@ -79,10 +79,21 @@ io.on('connection', (socket) => {
         console.log(`Message from ${data.username}: ${data.message}`);
     });
 
+    // Handle ignore actions
+    socket.on('ignore', ({ targetUser }) => {
+        console.log(`${socket.username} ignored ${targetUser}`);
+        socket.emit('ignoredUserUpdate', { action: 'ignore', targetUser });
+    });
+
+    socket.on('unignore', ({ targetUser }) => {
+        console.log(`${socket.username} unignored ${targetUser}`);
+        socket.emit('ignoredUserUpdate', { action: 'unignore', targetUser });
+    });
+
     // Handle disconnection
     socket.on('disconnect', () => {
         onlineUsers.delete(socket.username);
-        io.emit('updateUserList', Array.from(onlineUsers));
+        io.emit('updateUserList', Array.from(onlineUsers.keys()));
         console.log(`${socket.username} disconnected`);
     });
 });
@@ -92,4 +103,3 @@ const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
-
