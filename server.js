@@ -2,22 +2,28 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
-const cors = require('cors');
-const allowedOrigins = ['https://negombotech.com', 'https://chat.negombotech.com'];
 
+// Allowed Origins
+const allowedOrigins = [
+    'https://negombotech.com',
+    'https://chat.negombotech.com',
+    'https://api.negombotech.com'
+];
+
+// CORS Middleware for Express
 app.use(cors({
     origin: function (origin, callback) {
-        if (allowedOrigins.includes(origin) || !origin) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true,
+    credentials: true
 }));
 
 // Middleware
@@ -44,22 +50,40 @@ app.post('/api/login', (req, res) => {
     res.status(401).json({ message: 'Invalid username or password' });
 });
 
+// Socket.IO Server with CORS Configuration
+const io = new Server(server, {
+    cors: {
+        origin: allowedOrigins,
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
+
 // WebSocket Handlers
 const onlineUsers = new Set();
 
 io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    // Handle joining a user
     socket.on('join', (username) => {
+        socket.username = username;
         onlineUsers.add(username);
         io.emit('updateUserList', Array.from(onlineUsers));
+        console.log(`${username} joined the chat`);
     });
 
+    // Handle messages
     socket.on('message', (data) => {
         io.emit('message', data);
+        console.log(`Message from ${data.username}: ${data.message}`);
     });
 
+    // Handle disconnection
     socket.on('disconnect', () => {
         onlineUsers.delete(socket.username);
         io.emit('updateUserList', Array.from(onlineUsers));
+        console.log(`${socket.username} disconnected`);
     });
 });
 
