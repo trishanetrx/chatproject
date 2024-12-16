@@ -52,26 +52,32 @@ emojiButton.addEventListener('click', () => {
 // Update User List
 socket.on('updateUserList', (users) => {
     userList.innerHTML = ''; // Clear the list before updating
-    users.forEach((user) => {
-        const li = document.createElement('li');
-        li.textContent = user; // Assign username to the list item text
+    if (users && users.length > 0) {
+        users.forEach((user) => {
+            const li = document.createElement('li');
+            li.textContent = user; // Assign username to the list item text
 
-        // Add "Ignore" button
-        const ignoreButton = document.createElement('button');
-        ignoreButton.textContent = 'Ignore';
-        ignoreButton.onclick = () => {
-            if (!ignoredUsers.includes(user)) {
-                ignoredUsers.push(user); // Add to ignored users list
-                alert(`${user} has been ignored.`);
-            } else {
-                ignoredUsers = ignoredUsers.filter((ignored) => ignored !== user); // Remove from ignored list
-                alert(`${user} is no longer ignored.`);
-            }
-        };
+            // Add "Ignore" button
+            const ignoreButton = document.createElement('button');
+            ignoreButton.textContent = 'Ignore';
+            ignoreButton.onclick = () => {
+                if (!ignoredUsers.includes(user)) {
+                    ignoredUsers.push(user); // Add to ignored users list
+                    alert(`${user} has been ignored.`);
+                } else {
+                    ignoredUsers = ignoredUsers.filter((ignored) => ignored !== user); // Remove from ignored list
+                    alert(`${user} is no longer ignored.`);
+                }
+            };
 
-        li.appendChild(ignoreButton); // Attach button to list item
-        userList.appendChild(li);    // Add list item to the DOM
-    });
+            li.appendChild(ignoreButton); // Attach button to list item
+            userList.appendChild(li);    // Add list item to the DOM
+        });
+    } else {
+        const noUsers = document.createElement('li');
+        noUsers.textContent = 'No users online';
+        userList.appendChild(noUsers);
+    }
 });
 
 // Ensure socket connection emits a request for the current user list upon page load
