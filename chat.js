@@ -19,7 +19,7 @@ localStorage.setItem('username', username); // Save username if not set
 loggedInUserDisplay.textContent = `Logged in as: ${username}`;
 
 // Emit "join" to inform server of the connected user
-socket.emit('join', { username });
+socket.emit('join', username);
 
 // Dark Mode Toggle
 darkModeToggle.addEventListener('click', () => {
@@ -40,7 +40,7 @@ emojiButton.addEventListener('click', () => {
         const picker = new EmojiMart.Picker({
             set: 'apple',
             onEmojiSelect: (emoji) => {
-                messageInput.value += emoji.native;
+                messageInput.value += emoji.native; // Append emoji to input field
             },
         });
         emojiPickerContainer.innerHTML = '';
@@ -55,22 +55,24 @@ emojiButton.addEventListener('click', () => {
 
 // Update User List
 socket.on('updateUserList', (users) => {
+    console.log('Received user list:', users); // Debug to check the incoming list format
     userList.innerHTML = ''; // Clear the list before updating
-    if (users && users.length > 0) {
-        users.forEach((user) => {
+
+    if (Array.isArray(users) && users.length > 0) {
+        users.forEach((username) => {
             const li = document.createElement('li');
-            li.textContent = user;
+            li.textContent = username; // Display the username directly
 
             // Add "Ignore" button
             const ignoreButton = document.createElement('button');
             ignoreButton.textContent = 'Ignore';
             ignoreButton.onclick = () => {
-                if (!ignoredUsers.includes(user)) {
-                    ignoredUsers.push(user);
-                    alert(`${user} has been ignored.`);
+                if (!ignoredUsers.includes(username)) {
+                    ignoredUsers.push(username);
+                    alert(`${username} has been ignored.`);
                 } else {
-                    ignoredUsers = ignoredUsers.filter((ignored) => ignored !== user);
-                    alert(`${user} is no longer ignored.`);
+                    ignoredUsers = ignoredUsers.filter((ignored) => ignored !== username);
+                    alert(`${username} is no longer ignored.`);
                 }
             };
 
@@ -86,7 +88,8 @@ socket.on('updateUserList', (users) => {
 
 // Display Messages
 socket.on('message', (data) => {
-    if (ignoredUsers.includes(data.username)) return; // Ignore messages from ignored users
+    // Ignore messages from ignored users
+    if (ignoredUsers.includes(data.username)) return;
 
     const div = document.createElement('div');
     div.classList.add('message');
@@ -108,5 +111,6 @@ messageForm.addEventListener('submit', (e) => {
 
 // Request user list on connect
 socket.on('connect', () => {
-    socket.emit('requestUserList'); // Ensure server updates the user list
+    console.log('Connected to server, requesting user list...');
+    socket.emit('requestUserList');
 });
