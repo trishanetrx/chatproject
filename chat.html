@@ -12,10 +12,9 @@
     <script src="https://unpkg.com/emoji-mart@latest/dist/browser.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
     <style>
-        /* General Styles */
         body {
-            margin: 0;
             font-family: 'Inter', sans-serif;
+            margin: 0;
         }
 
         /* User List */
@@ -24,50 +23,42 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px;
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid #ddd;
         }
 
         #userList button {
             background: transparent;
-            border: none;
             color: red;
+            border: none;
             cursor: pointer;
-            transition: color 0.3s;
         }
 
-        #userList button:hover {
-            color: darkred;
-        }
-
-        /* Chat bubbles */
+        /* Chat Bubbles */
         #messages {
             display: flex;
             flex-direction: column;
-            gap: 10px;
             padding: 10px;
+            gap: 10px;
+            height: 100%;
         }
 
         .message {
             max-width: 60%;
             padding: 8px 12px;
             border-radius: 12px;
-            font-size: 14px;
-            word-wrap: break-word;
         }
 
         .message.sender {
             align-self: flex-end;
-            background-color: #e1f5fe;
-            color: #01579b;
+            background: #d1f4ff;
         }
 
         .message.receiver {
             align-self: flex-start;
-            background-color: #f1f1f1;
-            color: #333;
+            background: #f1f1f1;
         }
 
-        /* Dark mode */
+        /* Dark Mode */
         body.dark {
             background-color: #121212;
             color: #e0e0e0;
@@ -77,73 +68,54 @@
             background-color: #2e2e2e;
         }
 
-        body.dark input, body.dark button {
-            background-color: #424242;
-            color: #e0e0e0;
+        body.dark .message.sender {
+            background: #2e3b4e;
         }
 
-        body.dark #messages .message.sender {
-            background-color: #2e3b4e;
-            color: #cfd8dc;
-        }
-
-        body.dark #messages .message.receiver {
-            background-color: #37474f;
-            color: #cfd8dc;
+        body.dark .message.receiver {
+            background: #3b3b3b;
         }
     </style>
 </head>
-<body class="bg-gray-100 font-inter">
-    <!-- Header -->
-    <header class="bg-blue-600 text-white flex items-center justify-between p-4">
+<body class="bg-gray-100">
+    <header class="bg-blue-600 text-white flex justify-between p-4">
         <h1 class="text-2xl font-bold">VentiqoTech Chat</h1>
-        <button id="darkModeToggle" class="bg-gray-800 px-4 py-2 rounded hover:bg-gray-700">
-            Toggle Dark Mode
-        </button>
-        <button id="logoutButton" class="bg-red-500 px-4 py-2 rounded hover:bg-red-700">
-            Logout
-        </button>
+        <div>
+            <button id="darkModeToggle" class="bg-gray-800 px-3 py-1 rounded hover:bg-gray-700">
+                Toggle Dark Mode
+            </button>
+            <button id="logoutButton" class="bg-red-500 px-3 py-1 rounded hover:bg-red-700">
+                Logout
+            </button>
+        </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex h-[calc(100vh-64px)]">
+    <main class="flex h-screen">
         <!-- User List -->
         <aside class="w-1/4 bg-gray-100 p-4 overflow-y-auto border-r">
-            <h2 class="text-lg font-semibold mb-4">Online Users</h2>
-            <ul id="userList" class="space-y-3"></ul>
+            <h2 class="text-lg font-semibold mb-3">Online Users</h2>
+            <ul id="userList" class="space-y-2"></ul>
         </aside>
 
         <!-- Chat Section -->
         <section class="flex-1 flex flex-col bg-white">
-            <!-- Messages -->
-            <div id="messages" class="flex-1 p-4 overflow-y-auto space-y-4"></div>
+            <div id="messages" class="flex-1 p-4 overflow-y-auto"></div>
 
             <!-- Input -->
-            <div class="p-4 border-t relative">
-                <form id="messageForm" class="flex items-center space-x-3">
-                    <!-- Emoji Picker Button -->
-                    <button type="button" id="emojiButton" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
-                        <i class="far fa-smile"></i>
-                    </button>
-                    <!-- Message Input -->
-                    <input
-                        type="text"
-                        id="messageInput"
-                        class="flex-1 p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Type a message..."
-                        required
-                    />
-                    <!-- Send Button -->
-                    <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </form>
-                <!-- Emoji Picker -->
-                <div id="emojiPicker" class="hidden absolute bottom-16 left-4 z-10"></div>
-            </div>
+            <form id="messageForm" class="p-4 border-t flex space-x-2">
+                <button type="button" id="emojiButton" class="px-3 py-1 bg-gray-200 rounded">
+                    😊
+                </button>
+                <input
+                    id="messageInput"
+                    type="text"
+                    placeholder="Type a message..."
+                    class="flex-1 border rounded p-2 focus:outline-none"
+                />
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
+            </form>
         </section>
     </main>
-
     <script src="chat.js"></script>
 </body>
 </html>
