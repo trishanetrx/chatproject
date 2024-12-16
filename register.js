@@ -1,4 +1,4 @@
-const apiUrl = 'https://negombotech.com/api';
+const apiUrl = 'https://api.negombotech.com/api'; // Backend base URL
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
