@@ -5,10 +5,14 @@ const messages = document.getElementById('messages');
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
 
-// Emit event when user joins
-const username = localStorage.getItem('username') || prompt('Enter your username:');
-localStorage.setItem('username', username); // Store username for reuse
-socket.emit('join', username);
+// Retrieve username from localStorage
+const username = localStorage.getItem('username');
+if (!username) {
+    window.location.href = '/login.html'; // Redirect if username isn't available
+} else {
+    // Emit event when user joins
+    socket.emit('join', username);
+}
 
 // Update the user list
 socket.on('updateUserList', (users) => {
