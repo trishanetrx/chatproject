@@ -40,8 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Display success message
                 showNotification('Login successful! Redirecting...', 'success');
 
-                // Store the auth token in localStorage
+                // Store the auth token and username in localStorage
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('username', username); // Store the username
+
+                console.log('Token:', data.token); // Debugging
+                console.log('Username:', username); // Debugging
 
                 // Redirect after a short delay
                 setTimeout(() => {
