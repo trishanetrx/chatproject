@@ -45,7 +45,7 @@ app.post('/api/register', (req, res) => {
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (users.get(username) === password) {
-        return res.json({ token: 'dummy-token' });
+        return res.json({ token: 'dummy-token', username }); // Include username in response
     }
     res.status(401).json({ message: 'Invalid username or password' });
 });
@@ -92,3 +92,4 @@ const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
