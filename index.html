@@ -28,25 +28,37 @@
 
         main {
             display: flex;
-            flex-direction: column;
+            height: calc(100vh - 60px);
+            gap: 10px;
+            padding: 10px;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 60px);
-            text-align: center;
         }
 
-        button {
-            background-color: #007bff;
+        .image-frame {
+            flex: 1;
+            background-size: cover;
+            background-position: center;
+            height: 90%;
+            position: relative;
+            border-radius: 10px;
+        }
+
+        .image-frame button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 123, 255, 0.8);
             color: white;
-            padding: 8px 12px;
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin: 10px;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        .image-frame button:hover {
+            background-color: rgba(0, 86, 179, 0.8);
         }
     </style>
 </head>
@@ -58,11 +70,15 @@
 
     <!-- Main Content -->
     <main>
-        <div>
-            <button id="loginButton"><i class="fas fa-sign-in-alt"></i> Login</button>
-            <button id="registerButton"><i class="fas fa-user-plus"></i> Register</button>
+        <div class="image-frame" style="background-image: url('image1.png');">
+            <button id="loginButton">Login</button>
         </div>
-        <button id="chatButton"><i class="fas fa-comments"></i> Enter Chat Room</button>
+        <div class="image-frame" style="background-image: url('image2.png');">
+            <button id="registerButton">Register</button>
+        </div>
+        <div class="image-frame" style="background-image: url('image3.png');">
+            <button id="chatButton">Enter Chat Room</button>
+        </div>
     </main>
 
     <script>
