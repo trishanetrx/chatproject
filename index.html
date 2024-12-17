@@ -6,50 +6,72 @@
     <meta name="description" content="A public chat room application by GT-Tech">
     <meta name="keywords" content="chat, room, online, public">
     <title>VentiqoTech - Public Chat Room</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        header {
+            background: url('topblueline.png') no-repeat center center;
+            background-size: cover;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 60px);
+            text-align: center;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-roboto">
+<body>
     <!-- Header Section -->
-    <header class="bg-blue-600 text-white p-4">
-        <h1 class="text-2xl font-bold text-center">Welcome to Free Public Chat Room</h1>
+    <header>
+        <h1>Welcome to Free Public Chat Room</h1>
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto p-4">
-        <!-- Login/Register Navigation -->
-        <div class="flex justify-center space-x-4 mt-8">
-            <button id="loginButton" class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-700">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-            <button id="registerButton" class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-700">
-                <i class="fas fa-user-plus"></i> Register
-            </button>
+    <main>
+        <div>
+            <button id="loginButton"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button id="registerButton"><i class="fas fa-user-plus"></i> Register</button>
         </div>
-        <div class="flex justify-center mt-8">
-            <button id="chatButton" class="bg-purple-500 text-white px-8 py-3 rounded hover:bg-purple-700">
-                <i class="fas fa-comments"></i> Enter Chat Room
-            </button>
-        </div>
+        <button id="chatButton"><i class="fas fa-comments"></i> Enter Chat Room</button>
     </main>
 
-    <!-- Footer Section -->
-    <footer class="bg-gray-800 text-white text-center p-4 mt-4">
-        <p>&copy; 2024 VentiqoTech. All rights reserved.</p>
-    </footer>
-
-    <!-- JavaScript -->
     <script>
-        // Redirect to appropriate pages
         document.getElementById('loginButton').addEventListener('click', () => {
             window.location.href = '/login.html';
         });
-
         document.getElementById('registerButton').addEventListener('click', () => {
             window.location.href = '/register.html';
         });
-
         document.getElementById('chatButton').addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (token) {
