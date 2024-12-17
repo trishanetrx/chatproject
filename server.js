@@ -7,6 +7,7 @@ const cors = require('cors');
 const app = express();
 const server = http.createServer(app);
 
+
 // Allowed Origins
 const allowedOrigins = [
     'https://negombotech.com',
@@ -75,6 +76,7 @@ io.on('connection', (socket) => {
 
     // Handle messages
     socket.on('message', (data) => {
+	console.log('User list:', Array.from(onlineUsers.keys()));
         io.emit('message', data);
         console.log(`Message from ${data.username}: ${data.message}`);
     });
@@ -103,3 +105,4 @@ const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
