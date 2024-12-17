@@ -6,16 +6,22 @@
     <meta name="description" content="A public chat room application by GT-Tech">
     <meta name="keywords" content="chat, room, online, public">
     <title>VentiqoTech - Public Chat Room</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Styles -->
     <style>
+        /* General Styles */
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #121212;
             color: #e0e0e0;
         }
 
+        /* Header Styling */
         header {
             background: url('topblueline.png') no-repeat center center;
             background-size: cover;
@@ -26,10 +32,19 @@
             color: white;
         }
 
+        header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem; /* Larger font size */
+            font-weight: 700; /* Bold */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Subtle shadow */
+            margin: 0;
+        }
+
+        /* Main Content */
         main {
             display: flex;
             height: calc(100vh - 60px);
-            gap: 10px;
+            gap: 20px;
             padding: 10px;
             justify-content: center;
             align-items: center;
@@ -42,42 +57,39 @@
             height: 90%;
             position: relative;
             border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Frame shadow */
         }
 
-        /* Buttons Styling */
+        /* Button Styling */
         .image-frame button {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 15px 30px;
-            font-size: 1.5rem; /* Larger font */
-            font-weight: bold;
+            padding: 15px 40px; /* Larger uniform size */
+            font-size: 1.5rem;
+            font-weight: 600;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            color: white; /* Text color */
+            color: #fff;
+            text-transform: uppercase;
+            background-color: rgba(0, 123, 255, 0.85); /* Default blue */
             transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8); /* Glow effect */
         }
 
-        /* Unique button colors matching the images */
-        .image-frame:nth-child(1) button {
-            background-color: rgba(34, 49, 63, 0.85); /* Gray-blue for first image */
-        }
-
-        .image-frame:nth-child(2) button {
-            background-color: rgba(156, 102, 31, 0.85); /* Earthy brown for second image */
-        }
-
-        .image-frame:nth-child(3) button {
-            background-color: rgba(76, 187, 23, 0.85); /* Leafy green for third image */
-        }
-
-        /* Hover Effect */
+        /* Hover Effects with Dynamic Glow */
         .image-frame button:hover {
             transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 123, 255, 1), 0 0 40px rgba(0, 123, 255, 0.8);
             opacity: 0.9;
         }
+
+        /* Button Specific Colors */
+        .image-frame:nth-child(1) button { background-color: #1E90FF; } /* Light blue for Login */
+        .image-frame:nth-child(2) button { background-color: #28A745; } /* Green for Register */
+        .image-frame:nth-child(3) button { background-color: #FF5733; } /* Orange for Chat Now */
     </style>
 </head>
 <body>
@@ -96,10 +108,11 @@
             <button id="registerButton">Register</button>
         </div>
         <div class="image-frame" style="background-image: url('image3.png');">
-            <button id="chatButton">Enter Chat Room</button>
+            <button id="chatButton">Chat Now</button>
         </div>
     </main>
 
+    <!-- JavaScript -->
     <script>
         document.getElementById('loginButton').addEventListener('click', () => {
             window.location.href = '/login.html';
