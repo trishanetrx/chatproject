@@ -44,21 +44,39 @@
             border-radius: 10px;
         }
 
+        /* Buttons Styling */
         .image-frame button {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 123, 255, 0.8);
-            color: white;
-            padding: 10px 20px;
+            padding: 15px 30px;
+            font-size: 1.5rem; /* Larger font */
+            font-weight: bold;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
+            color: white; /* Text color */
+            transition: all 0.3s ease;
         }
 
+        /* Unique button colors matching the images */
+        .image-frame:nth-child(1) button {
+            background-color: rgba(34, 49, 63, 0.85); /* Gray-blue for first image */
+        }
+
+        .image-frame:nth-child(2) button {
+            background-color: rgba(156, 102, 31, 0.85); /* Earthy brown for second image */
+        }
+
+        .image-frame:nth-child(3) button {
+            background-color: rgba(76, 187, 23, 0.85); /* Leafy green for third image */
+        }
+
+        /* Hover Effect */
         .image-frame button:hover {
-            background-color: rgba(0, 86, 179, 0.8);
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -70,6 +88,7 @@
 
     <!-- Main Content -->
     <main>
+        <!-- Image Frames with Buttons -->
         <div class="image-frame" style="background-image: url('image1.png');">
             <button id="loginButton">Login</button>
         </div>
@@ -85,9 +104,11 @@
         document.getElementById('loginButton').addEventListener('click', () => {
             window.location.href = '/login.html';
         });
+
         document.getElementById('registerButton').addEventListener('click', () => {
             window.location.href = '/register.html';
         });
+
         document.getElementById('chatButton').addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (token) {
