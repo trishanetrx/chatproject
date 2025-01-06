@@ -7,7 +7,6 @@ const cors = require('cors');
 const app = express();
 const server = http.createServer(app);
 
-
 // Allowed Origins
 const allowedOrigins = [
     'https://negombotech.com',
@@ -31,13 +30,18 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // In-memory storage for users (replace with a database in production)
-const users = new Map();
+const users = new Map([
+    ['Admin', 'testpass231'] // Predefined Admin user
+]);
 
 // REST API Endpoints
 app.post('/api/register', (req, res) => {
     const { username, password } = req.body;
     if (users.has(username)) {
         return res.status(400).json({ message: 'User already exists' });
+    }
+    if (username === 'Admin') {
+        return res.status(403).json({ message: 'Cannot register as Admin.' });
     }
     users.set(username, password);
     res.status(201).json({ message: 'Registration successful' });
@@ -76,20 +80,8 @@ io.on('connection', (socket) => {
 
     // Handle messages
     socket.on('message', (data) => {
-	console.log('User list:', Array.from(onlineUsers.keys()));
         io.emit('message', data);
         console.log(`Message from ${data.username}: ${data.message}`);
-    });
-
-    // Handle ignore actions
-    socket.on('ignore', ({ targetUser }) => {
-        console.log(`${socket.username} ignored ${targetUser}`);
-        socket.emit('ignoredUserUpdate', { action: 'ignore', targetUser });
-    });
-
-    socket.on('unignore', ({ targetUser }) => {
-        console.log(`${socket.username} unignored ${targetUser}`);
-        socket.emit('ignoredUserUpdate', { action: 'unignore', targetUser });
     });
 
     // Handle disconnection
@@ -101,8 +93,7 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-const PORT = 3000;
+const PORT = 5000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
-
