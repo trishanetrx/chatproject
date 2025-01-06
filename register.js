@@ -17,6 +17,11 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         return;
     }
 
+    if (username === 'Admin') {
+        showNotification('Cannot register as Admin.', 'error');
+        return;
+    }
+
     try {
         const response = await fetch(`${apiUrl}/register`, {
             method: 'POST',
