@@ -55,32 +55,19 @@ emojiButton.addEventListener('click', () => {
 
 // Update User List
 socket.on('updateUserList', (users) => {
-    console.log('Received user list:', users); // Debugging line to verify incoming data
     userList.innerHTML = ''; // Clear the list before updating
 
     if (Array.isArray(users) && users.length > 0) {
         users.forEach((username) => {
             const li = document.createElement('li');
-            li.textContent = username; // Display the username directly
+            li.textContent = username;
 
-            // Add Ignore/Unignore button
-            const ignoreButton = document.createElement('button');
-            ignoreButton.textContent = ignoredUsers.includes(username) ? 'Unignore' : 'Ignore';
+            // Apply special style for Admin
+            if (username === 'Admin') {
+                li.style.color = 'red'; // Highlight Admin in red
+                li.style.fontWeight = 'bold';
+            }
 
-            // Button click behavior
-            ignoreButton.onclick = () => {
-                if (!ignoredUsers.includes(username)) {
-                    ignoredUsers.push(username);
-                    alert(`${username} has been ignored.`);
-                    ignoreButton.textContent = 'Unignore'; // Change button text to "Unignore"
-                } else {
-                    ignoredUsers = ignoredUsers.filter((ignored) => ignored !== username);
-                    alert(`${username} is no longer ignored.`);
-                    ignoreButton.textContent = 'Ignore'; // Change button text back to "Ignore"
-                }
-            };
-
-            li.appendChild(ignoreButton);
             userList.appendChild(li);
         });
     } else {
@@ -92,12 +79,17 @@ socket.on('updateUserList', (users) => {
 
 // Display Messages
 socket.on('message', (data) => {
-    // Ignore messages from ignored users
     if (ignoredUsers.includes(data.username)) return;
 
     const div = document.createElement('div');
     div.classList.add('message');
     div.classList.add(data.username === username ? 'sender' : 'receiver');
+
+    if (data.username === 'Admin') {
+        div.style.color = 'red'; // Highlight Admin messages in red
+        div.style.fontWeight = 'bold';
+    }
+
     div.textContent = `${data.username}: ${data.message}`;
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
