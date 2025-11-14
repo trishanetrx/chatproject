@@ -1,4 +1,4 @@
-const apiUrl = 'https://api.negombotech.com/api'; // Backend base URL
+const apiUrl = 'https://chatapi.copythingz.shop/api'; // Backend base URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
