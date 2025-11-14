@@ -1,4 +1,4 @@
-const apiUrl = 'https://api.negombotech.com/api'; // Backend base URL
+const apiUrl = 'https://chatapi.copythingz.shop/api'; // Backend base URL
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
