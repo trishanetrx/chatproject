@@ -1,4 +1,4 @@
-const socket = io('https://api.negombotech.com');
+const socket = io('https://chatapi.copythingz.shop');
 
 const userList = document.getElementById('userList');
 const messages = document.getElementById('messages');
