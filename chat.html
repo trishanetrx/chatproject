@@ -5,26 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Public chat room GTM Inc">
     <title>Chat Room - GTM Inc</title>
+
+    <!-- Tailwind + Fonts + Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- Socket.IO from your API domain -->
     <script src="https://chatapi.copythingz.shop/socket.io/socket.io.js"></script>
+
+    <!-- Emoji Mart -->
     <script src="https://unpkg.com/emoji-mart@latest/dist/browser.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
+    <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css"/>
+
     <style>
+        :root {
+            --header-height: 60px;
+        }
+
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            background-color: #0b0b0b;
+            color: #e0e0e0;
         }
 
         /* Header */
         header {
             background: url('topblueline.png') no-repeat center center;
             background-size: cover;
-            height: 60px;
+            height: var(--header-height);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -39,29 +52,30 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: all 0.15s ease-in-out;
         }
 
-       header button:hover {
-            background-color: #D55E22; /* Slightly darker blue */
-            box-shadow: 0 0 10px 4px rgba(0, 123, 255, 0.7); /* Glowing effect */
-            transform: scale(1.05); /* Optional: Slightly scale the button */
+        header button:hover {
+            background-color: #C45322;
+            box-shadow: 0 0 10px 4px rgba(213, 94, 40, 0.7);
+            transform: translateY(-1px);
         }
 
-        /* Layout */
         main {
             display: flex;
             flex: 1;
-            height: calc(100vh - 60px);
+            height: calc(100vh - var(--header-height));
         }
 
         /* Sidebar */
         aside {
-            background-color: #222;
+            background-color: #151515;
             color: #e0e0e0;
             padding: 15px;
-            width: 250px;
+            width: 260px;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid #2a2a2a;
         }
 
         aside h2 {
@@ -79,31 +93,24 @@
         }
 
         #userList li {
-            background: #333;
+            background: #222;
             color: #fff;
             margin-bottom: 8px;
             padding: 8px;
-            border-radius: 5px;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        #userList button {
-            background: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 5px 8px;
-            border-radius: 4px;
+            font-size: 14px;
         }
 
         .logged-in-user {
             text-align: center;
             margin-top: 10px;
             padding: 8px;
-            background: #444;
-            border-radius: 5px;
+            background: #202020;
+            border-radius: 6px;
+            font-size: 13px;
         }
 
         /* Chat Section */
@@ -111,114 +118,189 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background-color: #121212;
-            color: #e0e0e0;
+            background-color: #0f0f0f;
         }
 
         #messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
-            background-color: #1e1e1e;
+            padding: 16px;
+            background-color: #111;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        .message {
+        .message-row {
+            display: flex;
+            flex-direction: column;
             max-width: 70%;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 5px 0;
         }
 
-        /* Added opacity for sender and receiver */
-        .sender {
-            background-color: rgba(0, 123, 255, 0.3); /* Blue with 30% opacity */
-            color: white;
+        .message-row.me {
             align-self: flex-end;
+            align-items: flex-end;
         }
 
-        .receiver {
-            background-color: rgba(68, 68, 68, 0.3); /* Gray with 30% opacity */
-            color: #e0e0e0;
+        .message-row.other {
             align-self: flex-start;
+            align-items: flex-start;
         }
 
-        /* Highlight Effect with Transparency */
-        ::selection {
-            background: rgba(100, 100, 100, 0.4); /* Soft gray transparency */
+        .message-bubble {
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message-meta {
+            margin-top: 3px;
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .message-bubble.me {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: #fff;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-bubble.other {
+            background: #222;
+            color: #f5f5f5;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message-username {
+            font-weight: 600;
+            margin-bottom: 2px;
         }
 
         /* Input Section */
-        form {
+        form#messageForm {
             display: flex;
-            background-color: #222;
+            background-color: #181818;
             padding: 10px;
-            border-top: 1px solid #444;
+            border-top: 1px solid #262626;
+            gap: 8px;
+            align-items: center;
         }
 
-        form input {
+        #messageInput {
             flex: 1;
-            padding: 8px;
-            background-color: #333;
+            padding: 9px 10px;
+            background-color: #232323;
             color: #fff;
-            border: 1px solid #555;
-            border-radius: 5px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
-        form button {
-            background-color: #007bff;
-            color: white;
-            padding: 8px 12px;
+        #messageInput:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.7);
+        }
+
+        #emojiButton {
+            background: #262626;
+            border-radius: 999px;
+            width: 36px;
+            height: 36px;
             border: none;
-            border-radius: 5px;
-            margin-left: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        form button:hover {
-            background-color: #0056b3;
+        #emojiButton:hover {
+            background: #333;
+        }
+
+        form#messageForm button[type="submit"] {
+            background-color: #22c55e;
+            color: white;
+            padding: 9px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+
+        form#messageForm button[type="submit"]:hover {
+            background-color: #16a34a;
+            transform: translateY(-1px);
         }
 
         /* Emoji Picker */
         #emojiPicker {
             position: absolute;
-            bottom: 60px;
-            left: 10px;
-            z-index: 10;
-            background: #333;
-            border-radius: 5px;
-            padding: 10px;
+            bottom: 70px;
+            left: 16px;
+            z-index: 20;
+            background: #1f2933;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Dark mode variants via body.dark */
+        body.dark {
+            background-color: #020617;
+        }
+
+        body.dark main {
+            background-color: #020617;
+        }
+
+        body.dark section {
+            background-color: #020617;
+        }
+
+        body.dark #messages {
+            background-color: #020617;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>GTM Inc Chat</h1>
-        <div>
-            <button id="darkModeToggle">Dark Mode</button>
-            <button id="logoutButton">Logout</button>
-        </div>
-    </header>
+<header>
+    <h1 class="text-lg font-semibold">GTM Inc Chat</h1>
+    <div class="flex items-center gap-2">
+        <button id="darkModeToggle">Dark Mode</button>
+        <button id="logoutButton">Logout</button>
+    </div>
+</header>
 
-    <main>
-        <!-- Sidebar -->
-        <aside>
-            <h2>Online Users</h2>
-            <ul id="userList"></ul>
-            <div class="logged-in-user" id="loggedInUser"></div>
-        </aside>
+<main>
+    <!-- Sidebar -->
+    <aside>
+        <h2>Online Users</h2>
+        <ul id="userList"></ul>
+        <div class="logged-in-user" id="loggedInUser"></div>
+    </aside>
 
-        <!-- Chat Section -->
-        <section>
-            <div id="messages"></div>
-            <form id="messageForm">
-                <button type="button" id="emojiButton">😊</button>
-                <input id="messageInput" type="text" placeholder="Type a message..." required />
-                <button type="submit">Send</button>
-            </form>
-            <div id="emojiPicker" class="hidden"></div>
-        </section>
-    </main>
+    <!-- Chat Section -->
+    <section>
+        <div id="messages"></div>
+        <form id="messageForm">
+            <button type="button" id="emojiButton" title="Insert emoji">😊</button>
+            <input id="messageInput" type="text" placeholder="Type a message..." required autocomplete="off"/>
+            <button type="submit">Send</button>
+        </form>
+        <div id="emojiPicker" class="hidden"></div>
+    </section>
+</main>
 
-    <script src="chat.js"></script>
+<script src="chat.js"></script>
 </body>
 </html>
