@@ -1,5 +1,6 @@
 const socket = io("https://chatapi.copythingz.shop");
 
+// Elements
 const userList = document.getElementById("userList");
 const messages = document.getElementById("messages");
 const messageForm = document.getElementById("messageForm");
@@ -14,10 +15,8 @@ const logoutButton = document.getElementById("logoutButton");
 const username = localStorage.getItem("username");
 if (!username) window.location.href = "login.html";
 
-console.log("Logged in as:", username);
-
 // ------------------------------
-// REAL ANDROID VIEWPORT FIX
+// ANDROID VIEWPORT FIX
 // ------------------------------
 function applyRealVH() {
     const vh = window.innerHeight * 0.01;
@@ -28,7 +27,7 @@ window.addEventListener("resize", applyRealVH);
 window.addEventListener("orientationchange", applyRealVH);
 
 // ------------------------------
-// SIDEBAR MOBILE TOGGLE
+// SIDEBAR MOBILE
 // ------------------------------
 mobileSidebar.addEventListener("click", () => {
     sidebar.classList.add("show");
@@ -75,7 +74,6 @@ emojiButton.addEventListener("click", (e) => {
     }
 });
 
-// Close picker when clicking outside
 document.addEventListener("click", (e) => {
     if (
         pickerVisible &&
@@ -88,7 +86,7 @@ document.addEventListener("click", (e) => {
 });
 
 // ------------------------------
-// AUTO RESIZE TEXTAREA
+// TEXTAREA AUTO-RESIZE
 // ------------------------------
 messageInput.addEventListener("input", () => {
     messageInput.style.height = "auto";
@@ -112,8 +110,7 @@ function renderMessage(msg) {
     const row = document.createElement("div");
     row.classList.add("message-row");
 
-    const isMe = msg.username === username;
-    if (isMe) row.classList.add("me");
+    if (msg.username === username) row.classList.add("me");
 
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
@@ -132,41 +129,64 @@ function renderMessage(msg) {
 }
 
 // ------------------------------
-// LOAD CHAT HISTORY
+// CHAT HISTORY
 // ------------------------------
-socket.on("chatHistory", (history) => {
+socket.on("chatHistory", history => {
     messages.innerHTML = "";
     history.forEach(m => renderMessage(m));
     scrollToBottom();
 });
 
 // ------------------------------
-// INCOMING MESSAGE
+// NEW MESSAGE
 // ------------------------------
-socket.on("message", (msg) => {
+socket.on("message", msg => {
     renderMessage(msg);
 });
 
 // ------------------------------
-// UPDATE USER LIST
+// USER LIST (WhatsApp style)
 // ------------------------------
-socket.on("updateUserList", (list) => {
+socket.on("updateUserList", list => {
     userList.innerHTML = "";
 
-    list.forEach(user => {
+    list.forEach(name => {
         const li = document.createElement("li");
-        li.classList.add("p-3", "border-b", "border-[var(--border)]");
-        li.textContent = user === username ? `${user} (You)` : user;
+        li.classList.add("user-item");
+
+        const isAdmin = name === "Admin";
+        const isCurrent = name === username;
+
+        li.innerHTML = `
+            <div class="user-avatar">
+                ${isAdmin ? "🛡️" : name.charAt(0).toUpperCase()}
+            </div>
+
+            <div class="user-info">
+                <div class="user-name">${name}${isCurrent ? " (You)" : ""}</div>
+                ${isAdmin ? `<div class="user-badge">Administrator</div>` : ""}
+            </div>
+
+            <div class="online-indicator"></div>
+        `;
+
         userList.appendChild(li);
     });
 });
 
 // ------------------------------
-// SEND MESSAGE
+// SEND MESSAGE (Enter = send)
 // ------------------------------
+messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        messageForm.dispatchEvent(new Event("submit"));
+    }
+});
+
 messageForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    
+
     const msg = messageInput.value.trim();
     if (!msg) return;
 
