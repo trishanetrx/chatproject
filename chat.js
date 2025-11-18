@@ -1,164 +1,126 @@
-const socket = io('https://chatapi.copythingz.shop');
+const socket = io("https://chatapi.copythingz.shop");
 
-const userList = document.getElementById('userList');
-const messages = document.getElementById('messages');
-const messageForm = document.getElementById('messageForm');
-const messageInput = document.getElementById('messageInput');
-const emojiButton = document.getElementById('emojiButton');
-const emojiPickerContainer = document.getElementById('emojiPicker');
-const darkModeToggle = document.getElementById('darkModeToggle');
-const logoutButton = document.getElementById('logoutButton');
-const loggedInUserDisplay = document.getElementById('loggedInUser');
+// UI elements
+const userList = document.getElementById("userList");
+const messages = document.getElementById("messages");
+const messageForm = document.getElementById("messageForm");
+const messageInput = document.getElementById("messageInput");
+const emojiButton = document.getElementById("emojiButton");
+const emojiPickerContainer = document.getElementById("emojiPicker");
+const darkModeToggle = document.getElementById("darkModeToggle");
+const logoutButton = document.getElementById("logoutButton");
+const loggedInUserDisplay = document.getElementById("loggedInUser");
 
-// Maintain list of ignored users (future)
-let ignoredUsers = [];
+// -------------------------------
+// USER SETUP
+// -------------------------------
+const username = localStorage.getItem("username");
 
-/* ------------------------------------
-   THEME: DARK MODE INIT
------------------------------------- */
+if (!username) {
+    window.location.href = "login.html";
+}
+
+loggedInUserDisplay.textContent = `Logged in as: ${username}`;
+
+// Join server
+socket.emit("join", username);
+
+// -------------------------------
+// LOGOUT
+// -------------------------------
+logoutButton.addEventListener("click", () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("isAdmin");
+    window.location.href = "login.html";
+});
+
+// -------------------------------
+// DARK MODE
+// -------------------------------
 (function initTheme() {
-    const savedTheme = localStorage.getItem('chat_theme');
-    if (savedTheme === 'light') {
-        document.body.classList.remove('dark');
-        darkModeToggle.textContent = 'Dark Mode';
+    const saved = localStorage.getItem("chat_theme");
+
+    if (saved === "light") {
+        document.body.classList.remove("dark");
+        darkModeToggle.textContent = "Dark Mode";
     } else {
-        // Default dark mode
-        document.body.classList.add('dark');
-        darkModeToggle.textContent = 'Light Mode';
-        localStorage.setItem('chat_theme', 'dark');
+        document.body.classList.add("dark");
+        darkModeToggle.textContent = "Light Mode";
+        localStorage.setItem("chat_theme", "dark");
     }
 })();
 
-darkModeToggle.addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark');
-    darkModeToggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-    localStorage.setItem('chat_theme', isDark ? 'dark' : 'light');
+darkModeToggle.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark");
+    darkModeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+    localStorage.setItem("chat_theme", isDark ? "dark" : "light");
 });
 
-/* ------------------------------------
-   USER SETUP
------------------------------------- */
-const username = localStorage.getItem('username') || `Guest_${Math.floor(Math.random() * 1000)}`;
-localStorage.setItem('username', username);
-loggedInUserDisplay.textContent = `Logged in as: ${username}`;
-
-// Tell server that user joined
-socket.emit('join', username);
-
-/* ------------------------------------
-   LOGOUT
------------------------------------- */
-logoutButton.addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = '/login.html';
-});
-
-/* ------------------------------------
-   EMOJI PICKER
------------------------------------- */
+// -------------------------------
+// EMOJI PICKER
+// -------------------------------
 let pickerVisible = false;
-let emojiPickerInstance = null;
 
-emojiButton.addEventListener('click', () => {
+emojiButton.addEventListener("click", () => {
     if (!pickerVisible) {
-        emojiPickerInstance = new EmojiMart.Picker({
-            set: 'apple',
-            theme: 'dark',
-            onEmojiSelect: (emoji) => {
+        const picker = new EmojiMart.Picker({
+            theme: "dark",
+            onEmojiSelect: emoji => {
                 messageInput.value += emoji.native;
                 messageInput.focus();
-            },
+            }
         });
-        emojiPickerContainer.innerHTML = '';
-        emojiPickerContainer.appendChild(emojiPickerInstance);
-        emojiPickerContainer.classList.remove('hidden');
+        emojiPickerContainer.classList.remove("hidden");
+        emojiPickerContainer.innerHTML = "";
+        emojiPickerContainer.appendChild(picker);
         pickerVisible = true;
     } else {
-        emojiPickerContainer.classList.add('hidden');
+        emojiPickerContainer.classList.add("hidden");
         pickerVisible = false;
     }
 });
 
-// Close emoji picker when clicking outside
-document.addEventListener('click', (e) => {
+document.addEventListener("click", e => {
     if (pickerVisible &&
         !emojiPickerContainer.contains(e.target) &&
         e.target !== emojiButton) {
-        emojiPickerContainer.classList.add('hidden');
+
+        emojiPickerContainer.classList.add("hidden");
         pickerVisible = false;
     }
 });
 
-/* ------------------------------------
-   USER LIST UPDATE
------------------------------------- */
-socket.on('updateUserList', (users) => {
-    userList.innerHTML = '';
+// -------------------------------
+// RENDER MESSAGE
+// -------------------------------
+function renderMessage(msg) {
+    if (!msg) return;
 
-    if (Array.isArray(users) && users.length > 0) {
-        users.forEach((name) => {
-            const li = document.createElement('li');
-            const label = document.createElement('span');
+    const wrapper = document.createElement("div");
+    const isMe = msg.username === username;
 
-            label.textContent = name === username ? `${name} (You)` : name;
+    wrapper.classList.add("message-row");
+    if (isMe) wrapper.classList.add("me");
 
-            if (name === 'Admin') {
-                label.style.color = '#f97316';
-                label.style.fontWeight = 'bold';
-            }
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+    if (isMe) bubble.classList.add("me");
 
-            li.appendChild(label);
-            userList.appendChild(li);
-        });
-    } else {
-        const noUsers = document.createElement('li');
-        noUsers.textContent = 'No users online';
-        userList.appendChild(noUsers);
-    }
-});
+    let nameHtml = msg.username;
+    if (msg.username === "Admin") nameHtml = "🛡️ Admin";
 
-/* ------------------------------------
-   FORMAT TIME
------------------------------------- */
-function formatTime(ts) {
-    try {
-        const d = new Date(ts);
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch {
-        return '';
-    }
-}
+    bubble.innerHTML = `
+        <div class="font-bold mb-1 text-sm">${nameHtml}</div>
+        <div>${msg.message}</div>
+    `;
 
-/* ------------------------------------
-   RENDER MESSAGE
------------------------------------- */
-function renderMessage(data) {
-    if (!data || !data.username || typeof data.message !== 'string') return;
-    if (ignoredUsers.includes(data.username)) return;
+    const meta = document.createElement("div");
+    meta.classList.add("message-meta");
+    meta.textContent = new Date(msg.timestamp).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 
-    const isMe = data.username === username;
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('message-row', isMe ? 'me' : 'other');
-
-    const bubble = document.createElement('div');
-    bubble.classList.add('message-bubble', isMe ? 'me' : 'other');
-
-    const nameEl = document.createElement('div');
-    nameEl.classList.add('message-username');
-    if (data.username === 'Admin') {
-        nameEl.style.color = '#f97316';
-    }
-    nameEl.textContent = isMe ? `${data.username} (You)` : data.username;
-
-    const textEl = document.createElement('div');
-    textEl.textContent = data.message;
-
-    const meta = document.createElement('div');
-    meta.classList.add('message-meta');
-    meta.textContent = formatTime(data.timestamp);
-
-    bubble.appendChild(nameEl);
-    bubble.appendChild(textEl);
     wrapper.appendChild(bubble);
     wrapper.appendChild(meta);
 
@@ -166,45 +128,61 @@ function renderMessage(data) {
     messages.scrollTop = messages.scrollHeight;
 }
 
-/* ------------------------------------
-   NEW FEATURE:
-   LOAD CHAT HISTORY FROM DATABASE
------------------------------------- */
-socket.on('chatHistory', (historyMessages) => {
-    if (Array.isArray(historyMessages)) {
-        historyMessages.forEach((msg) => renderMessage(msg));
+// -------------------------------
+// LOAD CHAT HISTORY
+// -------------------------------
+socket.on("chatHistory", history => {
+    messages.innerHTML = "";
+    history.forEach(m => renderMessage(m));
+});
+
+// -------------------------------
+// LIVE MESSAGES
+// -------------------------------
+socket.on("message", msg => {
+    renderMessage(msg);
+});
+
+// -------------------------------
+// UPDATE ONLINE USERS
+// -------------------------------
+socket.on("updateUserList", list => {
+    userList.innerHTML = "";
+
+    if (!list || list.length === 0) {
+        userList.innerHTML = `<li class="text-gray-300">No users online</li>`;
+        return;
     }
+
+    list.forEach(name => {
+        const li = document.createElement("li");
+        li.classList.add("flex", "justify-between", "items-center",
+                         "bg-white/10", "p-2", "rounded");
+
+        let userLabel = name;
+        if (name === username) userLabel += " (You)";
+        if (name === "Admin") userLabel = "🛡️ Admin";
+
+        li.innerHTML = `<span>${userLabel}</span>`;
+        userList.appendChild(li);
+    });
 });
 
-/* ------------------------------------
-   SOCKET: LIVE INCOMING MESSAGES
------------------------------------- */
-socket.on('message', (data) => {
-    renderMessage(data);
-});
-
-/* ------------------------------------
-   ON CONNECT: REQUEST USERS
------------------------------------- */
-socket.on('connect', () => {
-    console.log('Connected to server, requesting user list...');
-    socket.emit('requestUserList');
-});
-
-/* ------------------------------------
-   SEND MESSAGE
------------------------------------- */
-messageForm.addEventListener('submit', (e) => {
+// -------------------------------
+// SEND MESSAGE
+// -------------------------------
+messageForm.addEventListener("submit", e => {
     e.preventDefault();
-    const message = messageInput.value.trim();
-    if (!message) return;
+    const msg = messageInput.value.trim();
+    if (!msg) return;
 
     const payload = {
         username,
-        message,
-        timestamp: new Date().toISOString(),
+        message: msg,
+        timestamp: new Date().toISOString()
     };
 
-    socket.emit('message', payload);
-    messageInput.value = '';
+    socket.emit("message", payload);
+
+    messageInput.value = "";
 });
