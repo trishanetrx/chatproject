@@ -7,7 +7,6 @@ const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const emojiButton = document.getElementById("emojiButton");
 const emojiPickerContainer = document.getElementById("emojiPicker");
-const darkModeToggle = document.getElementById("darkModeToggle");
 const logoutButton = document.getElementById("logoutButton");
 const loggedInUserDisplay = document.getElementById("loggedInUser");
 
@@ -30,30 +29,7 @@ socket.emit("join", username);
 // -------------------------------
 logoutButton.addEventListener("click", () => {
     localStorage.removeItem("username");
-    localStorage.removeItem("isAdmin");
     window.location.href = "login.html";
-});
-
-// -------------------------------
-// DARK MODE (background only)
-// -------------------------------
-(function initTheme() {
-    const saved = localStorage.getItem("chat_theme");
-
-    if (saved === "light") {
-        document.body.classList.remove("dark");
-        darkModeToggle.textContent = "Dark Mode";
-    } else {
-        document.body.classList.add("dark");
-        darkModeToggle.textContent = "Light Mode";
-        localStorage.setItem("chat_theme", "dark");
-    }
-})();
-
-darkModeToggle.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark");
-    darkModeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
-    localStorage.setItem("chat_theme", isDark ? "dark" : "light");
 });
 
 // -------------------------------
@@ -70,17 +46,20 @@ emojiButton.addEventListener("click", () => {
                 messageInput.focus();
             }
         });
-        emojiPickerContainer.classList.remove("hidden");
+
         emojiPickerContainer.innerHTML = "";
         emojiPickerContainer.appendChild(picker);
+
+        emojiPickerContainer.classList.remove("hidden");
         pickerVisible = true;
+
     } else {
         emojiPickerContainer.classList.add("hidden");
         pickerVisible = false;
     }
 });
 
-document.addEventListener("click", e => {
+document.addEventListener("click", (e) => {
     if (
         pickerVisible &&
         !emojiPickerContainer.contains(e.target) &&
@@ -92,37 +71,35 @@ document.addEventListener("click", e => {
 });
 
 // -------------------------------
-// FIXED COLOR BUBBLES (WHATSAPP STYLE)
-// -------------------------------
-const BUBBLE_ME = "background:#DCF8C6;color:#111;";
-const BUBBLE_OTHER = "background:#FFFFFF;color:#111;";
-
-// -------------------------------
-// RENDER MESSAGE
+// RENDER MESSAGE (OLED FIX)
 // -------------------------------
 function renderMessage(msg) {
     if (!msg) return;
 
     const wrapper = document.createElement("div");
-    const isMe = msg.username === username;
-
     wrapper.classList.add("message-row");
-    wrapper.classList.add(isMe ? "me" : "other");
 
+    const isMe = msg.username === username;
+    if (isMe) wrapper.classList.add("me");
+
+    // Create bubble
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
 
-    // WhatsApp fixed, non-theme-based bubble colors
-    bubble.setAttribute(
-        "style",
-        isMe ? BUBBLE_ME : BUBBLE_OTHER
-    );
+    // WhatsApp AMOLED theme colors
+    if (isMe) {
+        bubble.style.background = "#25D366";  // WhatsApp green
+        bubble.style.color = "#000";          // readable on green
+    } else {
+        bubble.style.background = "#1f1f1f";  // dark grey
+        bubble.style.color = "#fff";
+    }
 
-    const safeName =
-        msg.username === "Admin" ? "🛡️ Admin" : msg.username;
+    let displayName = msg.username;
+    if (msg.username === "Admin") displayName = "🛡️ Admin";
 
     bubble.innerHTML = `
-        <div class="font-bold mb-1 text-sm">${safeName}</div>
+        <div class="font-bold mb-1 text-sm">${displayName}</div>
         <div>${msg.message}</div>
     `;
 
@@ -162,26 +139,22 @@ socket.on("updateUserList", list => {
     userList.innerHTML = "";
 
     if (!list || list.length === 0) {
-        userList.innerHTML = `<li class="text-gray-300">No users online</li>`;
+        userList.innerHTML = `<li class="text-gray-400">No users online</li>`;
         return;
     }
 
     list.forEach(name => {
         const li = document.createElement("li");
         li.classList.add(
-            "flex",
-            "justify-between",
-            "items-center",
-            "bg-white/10",
-            "p-2",
-            "rounded"
+            "flex", "justify-between", "items-center",
+            "bg-[#1f2937]", "p-2", "rounded", "text-white"
         );
 
-        let userLabel = name;
-        if (name === username) userLabel += " (You)";
-        if (name === "Admin") userLabel = "🛡️ Admin";
+        let label = name;
+        if (name === username) label += " (You)";
+        if (name === "Admin") label = "🛡️ Admin";
 
-        li.innerHTML = `<span>${userLabel}</span>`;
+        li.innerHTML = `<span>${label}</span>`;
         userList.appendChild(li);
     });
 });
@@ -201,5 +174,6 @@ messageForm.addEventListener("submit", e => {
     };
 
     socket.emit("message", payload);
+
     messageInput.value = "";
 });
