@@ -16,6 +16,17 @@ if (!username) window.location.href = "login.html";
 loggedInUserDisplay.textContent = `Logged in as: ${username}`;
 socket.emit("join", username);
 
+// ======================================
+// ANDROID REAL VIEWPORT HEIGHT FIX
+// ======================================
+function applyRealVH() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+}
+applyRealVH();
+window.addEventListener("resize", applyRealVH);
+window.addEventListener("orientationchange", applyRealVH);
+
 // LOGOUT
 logoutButton.addEventListener("click", () => {
     localStorage.removeItem("username");
@@ -45,7 +56,7 @@ emojiButton.addEventListener("click", () => {
     }
 });
 
-// Close emoji picker
+// Close picker when clicking outside
 document.addEventListener("click", (e) => {
     if (
         pickerVisible &&
@@ -57,18 +68,16 @@ document.addEventListener("click", (e) => {
     }
 });
 
-// =============================
-// DYNAMIC BOTTOM PADDING FIX
-// =============================
+// DYNAMIC PADDING FIX
 function fixBottomPadding() {
     const formHeight = messageForm.offsetHeight;
-    messages.style.paddingBottom = (formHeight + 40) + "px";
+    messages.style.paddingBottom = (formHeight + 70) + "px";
 }
 setInterval(fixBottomPadding, 600);
 window.addEventListener("resize", fixBottomPadding);
 fixBottomPadding();
 
-// Auto-scroll to bottom
+// Scroll-to-bottom function
 function scrollToBottom(smooth = false) {
     messages.scrollTo({
         top: messages.scrollHeight,
@@ -76,9 +85,7 @@ function scrollToBottom(smooth = false) {
     });
 }
 
-// =============================
 // RENDER MESSAGE
-// =============================
 function renderMessage(msg) {
     const wrapper = document.createElement("div");
     wrapper.classList.add("message-row");
@@ -92,11 +99,10 @@ function renderMessage(msg) {
     bubble.style.background = isMe ? "#25D366" : "#1f1f1f";
     bubble.style.color = isMe ? "#000" : "#fff";
 
-    let displayName = msg.username;
-    if (msg.username === "Admin") displayName = "🛡️ Admin";
+    let label = msg.username === "Admin" ? "🛡️ Admin" : msg.username;
 
     bubble.innerHTML = `
-        <div class="font-bold mb-1 text-sm">${displayName}</div>
+        <div class="font-bold mb-1 text-sm">${label}</div>
         <div>${msg.message}</div>
     `;
 
@@ -109,12 +115,12 @@ function renderMessage(msg) {
 
     wrapper.appendChild(bubble);
     wrapper.appendChild(meta);
-    messages.appendChild(wrapper);
 
+    messages.appendChild(wrapper);
     scrollToBottom(true);
 }
 
-// HISTORY
+// CHAT HISTORY
 socket.on("chatHistory", history => {
     messages.innerHTML = "";
     history.forEach(m => renderMessage(m));
@@ -126,9 +132,10 @@ socket.on("message", msg => {
     renderMessage(msg);
 });
 
-// ONLINE USER LIST
+// USERS LIST
 socket.on("updateUserList", list => {
     userList.innerHTML = "";
+
     if (!list.length) {
         userList.innerHTML = `<li class="text-gray-400">No users online</li>`;
         return;
