@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('username', username);
 
                 setTimeout(() => {
-                    window.location.href = '/chat.html';
+                    window.location.href = 'chat.html';
                 }, 2000);
             } else {
                 showNotification(data.message || 'Login failed. Please try again.', 'error');
