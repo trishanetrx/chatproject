@@ -29,12 +29,13 @@
     <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
 
 <style>
-/* ============ GLOBAL AMOLED THEME ============ */
+
+/* Global AMOLED Black */
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background: #000000 !important;
-    color: #e5e5e5;
+    background: #000;
+    color: #fff;
     height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -44,7 +45,6 @@ body {
 /* HEADER */
 header {
     height: 65px;
-    flex-shrink: 0;
     background: #121212;
     border-bottom: 1px solid #1f1f1f;
     display: flex;
@@ -70,16 +70,7 @@ aside {
     background: #111827;
     border-right: 1px solid #1f2937;
     padding: 16px;
-    display: flex;
-    flex-direction: column;
     overflow-y: auto;
-}
-
-#userList li {
-    padding: 10px;
-    margin-bottom: 8px;
-    background: #1f2937;
-    border-radius: 8px;
 }
 
 /* CHAT SECTION */
@@ -87,7 +78,7 @@ section {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #000000;
+    background: #000;
 }
 
 /* MESSAGE AREA */
@@ -98,24 +89,29 @@ section {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    width: 100%;
+    padding-bottom: 140px !important;
     overscroll-behavior: contain;
 }
 
-/* MESSAGE ROWS */
+/* MESSAGE BUBBLE CONTAINER FIX */
 .message-row {
-    max-width: 75%;
+    width: fit-content;
+    max-width: calc(100% - 70px);
     display: flex;
     flex-direction: column;
 }
 
 .message-row.me {
-    align-self: flex-end;
+    margin-left: auto;
 }
 
-/* CHAT BUBBLES */
+/* BUBBLE */
 .message-bubble {
     padding: 12px 14px;
     border-radius: 14px;
+    word-break: break-word;
+    overflow-wrap: break-word;
     background: #1f1f1f;
 }
 
@@ -131,18 +127,16 @@ section {
     opacity: 0.7;
 }
 
-/* INPUT BAR — MOBILE SAFE */
+/* INPUT BAR — Sticky + Safe */
 #messageForm {
     background: #0a0a0a;
     border-top: 1px solid #1f1f1f;
     display: flex;
     gap: 10px;
     padding: 12px;
-
     position: sticky;
     bottom: 0;
     z-index: 20;
-
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
 
@@ -166,7 +160,6 @@ section {
         left: -300px;
         top: 65px;
         height: calc(100dvh - 65px);
-        width: 260px;
         transition: 0.3s;
         z-index: 200;
     }
@@ -184,12 +177,6 @@ section {
         color: white;
     }
 }
-
-@media (max-width: 768px) {
-    #messages {
-        padding-bottom: 90px;
-    }
-}
 </style>
 </head>
 
@@ -199,35 +186,26 @@ section {
     <span id="mobileSidebar"><i class="fas fa-bars"></i></span>
     <h1 class="text-lg font-bold">💬 GTM Public Chat</h1>
 
-    <button id="logoutButton"
-            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-        Logout
-    </button>
+    <button id="logoutButton" class="px-4 py-2 bg-red-500 text-white rounded">Logout</button>
 </header>
 
-<!-- MAIN -->
 <main>
 
     <!-- SIDEBAR -->
     <aside id="sidebar">
-        <h2 class="text-md font-bold text-white">Online Users</h2>
+        <h2 class="text-md font-bold">Online Users</h2>
         <ul id="userList"></ul>
-        <div id="loggedInUser"
-             class="mt-4 bg-gray-800 p-2 rounded text-center text-sm text-gray-300"></div>
+        <div id="loggedInUser" class="mt-4 bg-gray-800 p-2 rounded text-center text-sm"></div>
     </aside>
 
-    <!-- CHAT SECTION -->
+    <!-- CHAT -->
     <section>
         <div id="messages"></div>
 
-        <form id="messageForm" class="relative">
-            <button type="button" id="emojiButton"
-                    class="bg-gray-700 px-3 py-2 rounded text-white">😊</button>
-
+        <form id="messageForm">
+            <button type="button" id="emojiButton" class="bg-gray-700 px-3 py-2 rounded">😊</button>
             <input id="messageInput" placeholder="Type a message..." autocomplete="off" required />
-
-            <button type="submit" class="bg-green-600 px-4 py-2 rounded text-white">Send</button>
-
+            <button type="submit" class="bg-green-600 px-4 py-2 rounded text-black">Send</button>
             <div id="emojiPicker" class="hidden absolute bottom-16 right-2"></div>
         </form>
     </section>
@@ -237,10 +215,9 @@ section {
 <script src="chat.js"></script>
 
 <script>
-    // MOBILE SIDEBAR SLIDE
-    document.getElementById("mobileSidebar").onclick = () => {
-        document.getElementById("sidebar").classList.toggle("show");
-    };
+document.getElementById("mobileSidebar").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("show");
+};
 </script>
 
 </body>
