@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GTM Public Chat</title>
 
     <!-- Redirect if not logged in -->
@@ -15,116 +15,228 @@
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind config (REQUIRED for dark mode) -->
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-        };
-    </script>
-
-    <!-- Icons & Fonts -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- Socket.io -->
     <script src="https://chatapi.copythingz.shop/socket.io/socket.io.js"></script>
 
     <!-- Emoji Picker -->
     <script src="https://unpkg.com/emoji-mart@latest/dist/browser.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
 
-    <style>
-        body {
-            overflow: hidden;
-        }
+<style>
+/* ============ GLOBAL AMOLED THEME ============ */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #000000 !important;  /* AMOLED PURE BLACK */
+    color: #e5e5e5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-        /* SIDEBAR MOBILE ANIMATION */
-        #sidebar {
-            transition: left 0.3s ease;
-        }
+/* HEADER */
+header {
+    height: 65px;
+    flex-shrink: 0;
+    background: #121212;  /* WhatsApp dark header shade */
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
 
-        #sidebar.open {
-            left: 0;
-        }
+/* MAIN LAYOUT */
+main {
+    flex: 1;
+    height: calc(100vh - 65px);
+    display: flex;
+    overflow: hidden;
+}
 
-        /* Chat bubbles */
-        .bubble-me-light { background-color: #DCF8C6; color: #111; }
-        .bubble-me-dark { background-color: #25D366; color: #000; }
-        .bubble-other-light { background-color: #fff; color: #111; }
-        .bubble-other-dark { background-color: #1F1F1F; color: #fff; }
-    </style>
+/* SIDEBAR (Desktop static) */
+aside {
+    width: 260px;
+    background: #111827;  /* WhatsApp dark grey */
+    border-right: 1px solid #1f2937;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#userList {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 12px;
+}
+
+#userList li {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #1f2937;
+    border-radius: 8px;
+}
+
+/* CHAT SECTION */
+section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #000000;  /* AMOLED pure black */
+}
+
+/* MESSAGE AREA */
+#messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message-row {
+    max-width: 75%;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-row.me {
+    align-self: flex-end;
+}
+
+/* CHAT BUBBLES */
+.message-bubble {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #1f1f1f;   /* dark grey bubble */
+}
+
+/* MY (RIGHT SIDE) BUBBLES — GREEN FIXED */
+.message-bubble.me {
+    background: #25D366 !important;  /* WhatsApp green */
+    color: #000;
+}
+
+/* TIMESTAMP */
+.message-meta {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* INPUT BAR */
+#messageForm {
+    padding: 14px;
+    display: flex;
+    gap: 10px;
+    background: #0a0a0a;
+    border-top: 1px solid #1f1f1f;
+}
+
+#messageInput {
+    flex: 1;
+    padding: 12px;
+    background: #1f1f1f;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+}
+
+/* Mobile Sidebar Overlay */
+#mobileSidebar {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    aside {
+        position: fixed;
+        left: -300px;
+        top: 65px;
+        height: calc(100vh - 65px);
+        z-index: 100;
+        width: 260px;
+        transition: 0.3s;
+    }
+
+    aside.show {
+        left: 0;
+    }
+
+    #mobileSidebar {
+        display: block;
+        position: absolute;
+        left: 20px;
+        top: 18px;
+        font-size: 22px;
+        color: white;
+    }
+}
+</style>
 </head>
 
-<body class="bg-[#ECE5DD] dark:bg-black text-black dark:text-white">
+<body>
 
-<!-- HEADER (WhatsApp style) -->
-<header class="fixed top-0 left-0 w-full h-[60px] bg-white dark:bg-black border-b border-gray-300 dark:border-[#222] z-[1000] 
-flex items-center justify-between px-3">
+<header>
+    <span id="mobileSidebar"><i class="fas fa-bars"></i></span>
+    <h1 class="text-lg font-bold">💬 GTM Public Chat</h1>
 
-    <button id="mobileMenuBtn" class="text-3xl font-bold lg:hidden text-black dark:text-white">
-        ☰
-    </button>
-
-    <h1 class="font-semibold text-lg text-black dark:text-white">GTM Public Chat</h1>
-
-    <button id="themeToggle" class="text-xl px-3 py-1 dark:text-white">
-        🌙
-    </button>
-
-    <button id="logoutButton" class="px-3 py-1 bg-red-500 text-white rounded">
+    <button id="logoutButton"
+            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
         Logout
     </button>
 </header>
 
-<!-- MAIN CONTAINER -->
-<main class="absolute top-[60px] left-0 right-0 bottom-0 flex overflow-hidden">
+<!-- MAIN -->
+<main>
 
     <!-- SIDEBAR -->
-    <aside
-        id="sidebar"
-        class="w-[260px] bg-white dark:bg-black border-r border-gray-300 dark:border-[#222]
-        p-3 hidden lg:flex flex-col overflow-hidden lg:static fixed top-[60px] left-[-260px] h-[calc(100%-60px)] z-[1500]">
+    <aside id="sidebar">
+        <h2 class="text-md font-bold text-white">Online Users</h2>
 
-        <h2 class="font-bold mb-3 text-black dark:text-white">Online Users</h2>
-
-        <ul id="userList" class="flex-1 overflow-y-auto space-y-2 pr-1"></ul>
+        <ul id="userList"></ul>
 
         <div id="loggedInUser"
-             class="mt-3 text-center bg-gray-100 dark:bg-[#111] p-2 rounded text-sm text-gray-700 dark:text-gray-300">
-        </div>
+             class="mt-4 bg-gray-800 p-2 rounded text-center text-sm text-gray-300"></div>
     </aside>
 
-    <!-- OVERLAY (mobile only) -->
-    <div id="overlay" class="hidden fixed top-[60px] left-0 right-0 bottom-0 bg-black/50 z-[1400]"></div>
+    <!-- CHAT AREA -->
+    <section>
+        <div id="messages"></div>
 
-    <!-- CHAT SECTION -->
-    <section class="flex-1 flex flex-col bg-[#ECE5DD] dark:bg-black">
+        <form id="messageForm" class="relative">
+            <button type="button" id="emojiButton"
+                    class="bg-gray-700 px-3 py-2 rounded text-white">😊</button>
 
-        <!-- MESSAGES -->
-        <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+            <input id="messageInput" placeholder="Type a message..." autocomplete="off" required />
 
-        <!-- INPUT BAR -->
-        <form id="messageForm" class="p-3 flex gap-2 items-center bg-white dark:bg-black border-t border-gray-300 dark:border-[#222]">
+            <button type="submit" class="bg-green-600 px-4 py-2 rounded text-white">Send</button>
 
-            <button type="button" id="emojiButton" class="text-2xl">😊</button>
-
-            <input
-                id="messageInput"
-                class="flex-1 bg-white dark:bg-[#111] text-black dark:text-white p-2 rounded border border-gray-300 dark:border-[#333]"
-                placeholder="Type a message..."
-                autocomplete="off"
-                required
-            />
-
-            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">
-                Send
-            </button>
-
-            <div id="emojiPicker" class="absolute bottom-[70px] left-3 z-[2000] hidden"></div>
+            <div id="emojiPicker" class="hidden"></div>
         </form>
     </section>
 
 </main>
 
 <script src="chat.js"></script>
+
+<script>
+    // MOBILE SIDEBAR SLIDE
+    document.getElementById("mobileSidebar").onclick = () => {
+        document.getElementById("sidebar").classList.toggle("show");
+    };
+</script>
 
 </body>
 </html>
