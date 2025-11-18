@@ -21,7 +21,6 @@ if (!username) {
 
 loggedInUserDisplay.textContent = `Logged in as: ${username}`;
 
-// Join server
 socket.emit("join", username);
 
 // -------------------------------
@@ -70,9 +69,35 @@ document.addEventListener("click", (e) => {
     }
 });
 
-// -------------------------------
-// RENDER MESSAGE (OLED FIX)
-// -------------------------------
+// =====================================================
+// ⭐ MOBILE SCROLL FIX + KEYBOARD SAFE AREA
+// =====================================================
+function scrollToBottom(smooth = false) {
+    if (smooth) {
+        messages.scrollTo({
+            top: messages.scrollHeight,
+            behavior: "smooth"
+        });
+    } else {
+        messages.scrollTop = messages.scrollHeight;
+    }
+}
+
+// Fix for Android keyboard resizing
+window.addEventListener("resize", () => {
+    setTimeout(scrollToBottom, 50);
+});
+
+// iOS / Android "safe area" bottom padding
+function adjustSafePadding() {
+    const safeInset = parseInt(window.getComputedStyle(messageForm).paddingBottom);
+    messages.style.paddingBottom = (safeInset + 20) + "px";
+}
+adjustSafePadding();
+
+// =====================================================
+// RENDER MESSAGE
+// =====================================================
 function renderMessage(msg) {
     if (!msg) return;
 
@@ -82,16 +107,14 @@ function renderMessage(msg) {
     const isMe = msg.username === username;
     if (isMe) wrapper.classList.add("me");
 
-    // Create bubble
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
 
-    // WhatsApp AMOLED theme colors
     if (isMe) {
-        bubble.style.background = "#25D366";  // WhatsApp green
-        bubble.style.color = "#000";          // readable on green
+        bubble.style.background = "#25D366";
+        bubble.style.color = "#000";
     } else {
-        bubble.style.background = "#1f1f1f";  // dark grey
+        bubble.style.background = "#1f1f1f";
         bubble.style.color = "#fff";
     }
 
@@ -112,29 +135,32 @@ function renderMessage(msg) {
 
     wrapper.appendChild(bubble);
     wrapper.appendChild(meta);
-
     messages.appendChild(wrapper);
-    messages.scrollTop = messages.scrollHeight;
+
+    // Scroll fix
+    scrollToBottom(true);
 }
 
-// -------------------------------
+// =====================================================
 // LOAD CHAT HISTORY
-// -------------------------------
+// =====================================================
 socket.on("chatHistory", history => {
     messages.innerHTML = "";
     history.forEach(m => renderMessage(m));
+
+    scrollToBottom();
 });
 
-// -------------------------------
+// =====================================================
 // LIVE MESSAGES
-// -------------------------------
+// =====================================================
 socket.on("message", msg => {
     renderMessage(msg);
 });
 
-// -------------------------------
+// =====================================================
 // UPDATE ONLINE USERS
-// -------------------------------
+// =====================================================
 socket.on("updateUserList", list => {
     userList.innerHTML = "";
 
@@ -159,9 +185,9 @@ socket.on("updateUserList", list => {
     });
 });
 
-// -------------------------------
+// =====================================================
 // SEND MESSAGE
-// -------------------------------
+// =====================================================
 messageForm.addEventListener("submit", e => {
     e.preventDefault();
     const msg = messageInput.value.trim();
@@ -174,6 +200,7 @@ messageForm.addEventListener("submit", e => {
     };
 
     socket.emit("message", payload);
-
     messageInput.value = "";
+
+    scrollToBottom(true);
 });
