@@ -1,26 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Chat Dashboard</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen">
 
-    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h1 class="text-2xl font-bold mb-4 text-center">Admin Login</h1>
+    <div class="bg-white p-8 rounded-lg shadow-lg w-[380px]">
+        <h1 class="text-2xl font-bold text-center mb-6">Admin Login</h1>
 
-        <input id="username" class="p-2 border w-full mb-3 rounded" placeholder="Admin username">
-        <input id="password" type="password" class="p-2 border w-full mb-3 rounded" placeholder="Password">
+        <div id="errorBox" class="hidden bg-red-100 text-red-600 p-3 rounded mb-4"></div>
 
-        <button id="loginBtn" class="bg-blue-600 text-white w-full p-2 rounded">
-            Login
-        </button>
+        <form id="loginForm">
+            <label class="block font-semibold mb-1">Username</label>
+            <input id="username" type="text" class="w-full p-2 border rounded mb-4" required>
 
-        <p id="status" class="mt-3 text-center text-red-600"></p>
+            <label class="block font-semibold mb-1">Password</label>
+            <input id="password" type="password" class="w-full p-2 border rounded mb-6" required>
+
+            <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+                Login
+            </button>
+        </form>
     </div>
 
-    <script src="adminLogin.js"></script>
-
+    <script src="admin-login.js"></script>
 </body>
 </html>
