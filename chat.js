@@ -15,9 +15,9 @@ const logoutButton = document.getElementById("logoutButton");
 const username = localStorage.getItem("username");
 if (!username) window.location.href = "login.html";
 
-// ------------------------------
-// ANDROID VIEWPORT FIX
-// ------------------------------
+// ------------------------------------------------------
+// ANDROID SAFE HEIGHT FIX
+// ------------------------------------------------------
 function applyRealVH() {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -26,30 +26,29 @@ applyRealVH();
 window.addEventListener("resize", applyRealVH);
 window.addEventListener("orientationchange", applyRealVH);
 
-// ------------------------------
+// ------------------------------------------------------
 // SIDEBAR MOBILE
-// ------------------------------
+// ------------------------------------------------------
 mobileSidebar.addEventListener("click", () => {
     sidebar.classList.add("show");
     sidebarOverlay.classList.add("show");
 });
-
 sidebarOverlay.addEventListener("click", () => {
     sidebar.classList.remove("show");
     sidebarOverlay.classList.remove("show");
 });
 
-// ------------------------------
+// ------------------------------------------------------
 // LOGOUT
-// ------------------------------
+// ------------------------------------------------------
 logoutButton.addEventListener("click", () => {
-    localStorage.removeItem("username");
+    localStorage.clear();
     window.location.href = "login.html";
 });
 
-// ------------------------------
+// ------------------------------------------------------
 // EMOJI PICKER
-// ------------------------------
+// ------------------------------------------------------
 let pickerVisible = false;
 
 emojiButton.addEventListener("click", (e) => {
@@ -58,7 +57,7 @@ emojiButton.addEventListener("click", (e) => {
     if (!pickerVisible) {
         const picker = new EmojiMart.Picker({
             theme: "dark",
-            onEmojiSelect: emoji => {
+            onEmojiSelect: (emoji) => {
                 messageInput.value += emoji.native;
                 messageInput.focus();
             }
@@ -85,98 +84,131 @@ document.addEventListener("click", (e) => {
     }
 });
 
-// ------------------------------
-// TEXTAREA AUTO-RESIZE
-// ------------------------------
+// ------------------------------------------------------
+// TEXTAREA AUTO HEIGHT
+// ------------------------------------------------------
 messageInput.addEventListener("input", () => {
     messageInput.style.height = "auto";
     messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + "px";
 });
 
-// ------------------------------
+// ------------------------------------------------------
 // SCROLL TO BOTTOM
-// ------------------------------
+// ------------------------------------------------------
 function scrollToBottom(smooth = false) {
     messages.scrollTo({
         top: messages.scrollHeight,
-        behavior: smooth ? "smooth" : "auto"
+        behavior: smooth ? "smooth" : "auto",
     });
 }
 
-// ------------------------------
-// RENDER MESSAGE
-// ------------------------------
-function renderMessage(msg) {
+// ------------------------------------------------------
+// RENDER MESSAGE (Original logic merged)
+// ------------------------------------------------------
+function formatTime(ts) {
+    try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch {
+        return "";
+    }
+}
+
+function renderMessage(data) {
+    if (!data || !data.username || typeof data.message !== "string") return;
+
+    const isMe = data.username === username;
+
     const row = document.createElement("div");
     row.classList.add("message-row");
-
-    if (msg.username === username) row.classList.add("me");
+    if (isMe) row.classList.add("me");
 
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
 
-    bubble.innerHTML = `
-        <div>${msg.message}</div>
-        <div class="message-meta">
-            ${new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </div>
-    `;
+    // NAME (Admin orange, You label)
+    const nameEl = document.createElement("div");
+    nameEl.classList.add("message-username");
+    if (data.username === "Admin") nameEl.style.color = "#f97316";
+    nameEl.textContent = isMe ? `${data.username} (You)` : data.username;
+
+    // TEXT
+    const textEl = document.createElement("div");
+    textEl.textContent = data.message;
+
+    // META
+    const meta = document.createElement("div");
+    meta.classList.add("message-meta");
+    meta.textContent = formatTime(data.timestamp);
+
+    bubble.appendChild(nameEl);
+    bubble.appendChild(textEl);
 
     row.appendChild(bubble);
-    messages.appendChild(row);
+    row.appendChild(meta);
 
+    messages.appendChild(row);
     scrollToBottom(true);
 }
 
-// ------------------------------
-// CHAT HISTORY
-// ------------------------------
-socket.on("chatHistory", history => {
-    messages.innerHTML = "";
-    history.forEach(m => renderMessage(m));
-    scrollToBottom();
+// ------------------------------------------------------
+// REQUEST USER LIST ON CONNECT (Admin compatibility)
+// ------------------------------------------------------
+socket.on("connect", () => {
+    socket.emit("requestUserList");
+    socket.emit("join", username);
 });
 
-// ------------------------------
-// NEW MESSAGE
-// ------------------------------
-socket.on("message", msg => {
-    renderMessage(msg);
-});
-
-// ------------------------------
-// USER LIST (WhatsApp style)
-// ------------------------------
-socket.on("updateUserList", list => {
+// ------------------------------------------------------
+// RESTORE OLD USER LIST LOGIC (Admin-safe)
+// ------------------------------------------------------
+socket.on("updateUserList", (users) => {
     userList.innerHTML = "";
 
-    list.forEach(name => {
+    if (!Array.isArray(users) || users.length === 0) {
+        const noUsers = document.createElement("li");
+        noUsers.textContent = "No users online";
+        userList.appendChild(noUsers);
+        return;
+    }
+
+    users.forEach((name) => {
         const li = document.createElement("li");
-        li.classList.add("user-item");
 
-        const isAdmin = name === "Admin";
-        const isCurrent = name === username;
+        let label = name;
+        if (name === username) label = `${name} (You)`;
+        if (name === "Admin") {
+            label = "🛡️ Admin";
+            li.style.fontWeight = "bold";
+            li.style.color = "#f97316";
+        }
 
-        li.innerHTML = `
-            <div class="user-avatar">
-                ${isAdmin ? "🛡️" : name.charAt(0).toUpperCase()}
-            </div>
-
-            <div class="user-info">
-                <div class="user-name">${name}${isCurrent ? " (You)" : ""}</div>
-                ${isAdmin ? `<div class="user-badge">Administrator</div>` : ""}
-            </div>
-
-            <div class="online-indicator"></div>
-        `;
-
+        li.textContent = label;
         userList.appendChild(li);
     });
 });
 
-// ------------------------------
-// SEND MESSAGE (Enter = send)
-// ------------------------------
+// ------------------------------------------------------
+// CHAT HISTORY (Original logic)
+// ------------------------------------------------------
+socket.on("chatHistory", (history) => {
+    messages.innerHTML = "";
+    if (Array.isArray(history)) {
+        history.forEach((msg) => renderMessage(msg));
+    }
+    scrollToBottom();
+});
+
+// ------------------------------------------------------
+// NEW MESSAGE
+// ------------------------------------------------------
+socket.on("message", (data) => {
+    renderMessage(data);
+});
+
+// ------------------------------------------------------
+// SEND MESSAGE + ENTER KEY (Original behavior)
+// ------------------------------------------------------
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -187,13 +219,13 @@ messageInput.addEventListener("keydown", (e) => {
 messageForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const msg = messageInput.value.trim();
-    if (!msg) return;
+    const message = messageInput.value.trim();
+    if (!message) return;
 
     socket.emit("message", {
         username,
-        message: msg,
-        timestamp: new Date().toISOString()
+        message,
+        timestamp: new Date().toISOString(),
     });
 
     messageInput.value = "";
