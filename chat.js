@@ -1,6 +1,6 @@
 const socket = io("https://chatapi.copythingz.shop");
 
-// UI elements
+// Elements
 const userList = document.getElementById("userList");
 const messages = document.getElementById("messages");
 const messageForm = document.getElementById("messageForm");
@@ -10,30 +10,19 @@ const emojiPickerContainer = document.getElementById("emojiPicker");
 const logoutButton = document.getElementById("logoutButton");
 const loggedInUserDisplay = document.getElementById("loggedInUser");
 
-// -------------------------------
-// USER SETUP
-// -------------------------------
 const username = localStorage.getItem("username");
-
-if (!username) {
-    window.location.href = "login.html";
-}
+if (!username) window.location.href = "login.html";
 
 loggedInUserDisplay.textContent = `Logged in as: ${username}`;
-
 socket.emit("join", username);
 
-// -------------------------------
 // LOGOUT
-// -------------------------------
 logoutButton.addEventListener("click", () => {
     localStorage.removeItem("username");
     window.location.href = "login.html";
 });
 
-// -------------------------------
 // EMOJI PICKER
-// -------------------------------
 let pickerVisible = false;
 
 emojiButton.addEventListener("click", () => {
@@ -48,16 +37,15 @@ emojiButton.addEventListener("click", () => {
 
         emojiPickerContainer.innerHTML = "";
         emojiPickerContainer.appendChild(picker);
-
         emojiPickerContainer.classList.remove("hidden");
         pickerVisible = true;
-
     } else {
         emojiPickerContainer.classList.add("hidden");
         pickerVisible = false;
     }
 });
 
+// Close emoji picker
 document.addEventListener("click", (e) => {
     if (
         pickerVisible &&
@@ -69,38 +57,29 @@ document.addEventListener("click", (e) => {
     }
 });
 
-// =====================================================
-// ⭐ MOBILE SCROLL FIX + KEYBOARD SAFE AREA
-// =====================================================
+// =============================
+// DYNAMIC BOTTOM PADDING FIX
+// =============================
+function fixBottomPadding() {
+    const formHeight = messageForm.offsetHeight;
+    messages.style.paddingBottom = (formHeight + 40) + "px";
+}
+setInterval(fixBottomPadding, 600);
+window.addEventListener("resize", fixBottomPadding);
+fixBottomPadding();
+
+// Auto-scroll to bottom
 function scrollToBottom(smooth = false) {
-    if (smooth) {
-        messages.scrollTo({
-            top: messages.scrollHeight,
-            behavior: "smooth"
-        });
-    } else {
-        messages.scrollTop = messages.scrollHeight;
-    }
+    messages.scrollTo({
+        top: messages.scrollHeight,
+        behavior: smooth ? "smooth" : "auto"
+    });
 }
 
-// Fix for Android keyboard resizing
-window.addEventListener("resize", () => {
-    setTimeout(scrollToBottom, 50);
-});
-
-// iOS / Android "safe area" bottom padding
-function adjustSafePadding() {
-    const safeInset = parseInt(window.getComputedStyle(messageForm).paddingBottom);
-    messages.style.paddingBottom = (safeInset + 20) + "px";
-}
-adjustSafePadding();
-
-// =====================================================
+// =============================
 // RENDER MESSAGE
-// =====================================================
+// =============================
 function renderMessage(msg) {
-    if (!msg) return;
-
     const wrapper = document.createElement("div");
     wrapper.classList.add("message-row");
 
@@ -110,13 +89,8 @@ function renderMessage(msg) {
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
 
-    if (isMe) {
-        bubble.style.background = "#25D366";
-        bubble.style.color = "#000";
-    } else {
-        bubble.style.background = "#1f1f1f";
-        bubble.style.color = "#fff";
-    }
+    bubble.style.background = isMe ? "#25D366" : "#1f1f1f";
+    bubble.style.color = isMe ? "#000" : "#fff";
 
     let displayName = msg.username;
     if (msg.username === "Admin") displayName = "🛡️ Admin";
@@ -137,34 +111,25 @@ function renderMessage(msg) {
     wrapper.appendChild(meta);
     messages.appendChild(wrapper);
 
-    // Scroll fix
     scrollToBottom(true);
 }
 
-// =====================================================
-// LOAD CHAT HISTORY
-// =====================================================
+// HISTORY
 socket.on("chatHistory", history => {
     messages.innerHTML = "";
     history.forEach(m => renderMessage(m));
-
     scrollToBottom();
 });
 
-// =====================================================
 // LIVE MESSAGES
-// =====================================================
 socket.on("message", msg => {
     renderMessage(msg);
 });
 
-// =====================================================
-// UPDATE ONLINE USERS
-// =====================================================
+// ONLINE USER LIST
 socket.on("updateUserList", list => {
     userList.innerHTML = "";
-
-    if (!list || list.length === 0) {
+    if (!list.length) {
         userList.innerHTML = `<li class="text-gray-400">No users online</li>`;
         return;
     }
@@ -185,22 +150,18 @@ socket.on("updateUserList", list => {
     });
 });
 
-// =====================================================
 // SEND MESSAGE
-// =====================================================
 messageForm.addEventListener("submit", e => {
     e.preventDefault();
     const msg = messageInput.value.trim();
     if (!msg) return;
 
-    const payload = {
+    socket.emit("message", {
         username,
         message: msg,
         timestamp: new Date().toISOString()
-    };
+    });
 
-    socket.emit("message", payload);
     messageInput.value = "";
-
     scrollToBottom(true);
 });
