@@ -1,7 +1,18 @@
 const API_BASE = "https://chatapi.copythingz.shop/api/admin";
-const ADMIN_TOKEN = "super-admin-secret";
 
-// ---------------- TAB SYSTEM ----------------
+function authHeader() {
+    return {
+        "Authorization": "Bearer " + localStorage.getItem("adminToken"),
+        "Content-Type": "application/json"
+    };
+}
+
+// Redirect if no token
+if (!localStorage.getItem("adminToken")) {
+    window.location.href = "admin-login.html";
+}
+
+// ---------- TAB SETUP ----------
 const tabUsers = document.getElementById("tabUsers");
 const tabMessages = document.getElementById("tabMessages");
 const tabBans = document.getElementById("tabBans");
@@ -23,13 +34,13 @@ function switchTab(tab) {
         tabUsers.classList.add("tab-active");
         sectionUsers.classList.remove("hidden");
         loadUsers();
-    } 
-    else if (tab === "messages") {
+    }
+    if (tab === "messages") {
         tabMessages.classList.add("tab-active");
         sectionMessages.classList.remove("hidden");
         loadMessages();
-    } 
-    else {
+    }
+    if (tab === "bans") {
         tabBans.classList.add("tab-active");
         sectionBans.classList.remove("hidden");
         loadBans();
@@ -42,13 +53,11 @@ tabBans.onclick = () => switchTab("bans");
 
 switchTab("users");
 
-// ---------------- LOAD USERS ----------------
+// ---------- LOAD USERS ----------
 async function loadUsers() {
-    const res = await fetch(`${API_BASE}/users`, {
-        headers: { "admin-token": ADMIN_TOKEN }
-    });
-
+    const res = await fetch(`${API_BASE}/users`, { headers: authHeader() });
     const users = await res.json();
+
     const table = document.getElementById("usersTable");
     table.innerHTML = "";
 
@@ -58,24 +67,18 @@ async function loadUsers() {
             <td class="p-3">${u.id}</td>
             <td class="p-3">${u.username}</td>
             <td class="p-3">
-                <button onclick="kickUser('${u.username}')" 
-                class="bg-red-500 text-white px-3 py-1 rounded">Kick</button>
-
-                <button onclick="banUser('${u.username}')" 
-                class="bg-yellow-500 text-white px-3 py-1 rounded">Ban</button>
+                <button class="bg-red-500 text-white px-3 py-1 rounded" onclick="kickUser('${u.username}')">Kick</button>
+                <button class="bg-yellow-500 text-white px-3 py-1 rounded" onclick="banUser('${u.username}')">Ban</button>
             </td>
-        </tr>
-        `;
+        </tr>`;
     });
 }
 
-// ---------------- LOAD MESSAGES ----------------
+// ---------- LOAD MESSAGES ----------
 async function loadMessages() {
-    const res = await fetch(`${API_BASE}/messages`, {
-        headers: { "admin-token": ADMIN_TOKEN }
-    });
-
+    const res = await fetch(`${API_BASE}/messages`, { headers: authHeader() });
     const messages = await res.json();
+
     const table = document.getElementById("messagesTable");
     table.innerHTML = "";
 
@@ -87,21 +90,17 @@ async function loadMessages() {
             <td class="p-3">${m.message}</td>
             <td class="p-3">${m.timestamp}</td>
             <td class="p-3">
-                <button onclick="deleteMessage(${m.id})"
-                class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                <button class="bg-red-600 text-white px-3 py-1 rounded" onclick="deleteMessage(${m.id})">Delete</button>
             </td>
-        </tr>
-        `;
+        </tr>`;
     });
 }
 
-// ---------------- LOAD BANNED USERS ----------------
+// ---------- LOAD BANS ----------
 async function loadBans() {
-    const res = await fetch(`${API_BASE}/bans`, {
-        headers: { "admin-token": ADMIN_TOKEN }
-    });
-
+    const res = await fetch(`${API_BASE}/bans`, { headers: authHeader() });
     const bans = await res.json();
+
     const table = document.getElementById("bansTable");
     table.innerHTML = "";
 
@@ -110,19 +109,17 @@ async function loadBans() {
         <tr class="border-b">
             <td class="p-3">${b.username}</td>
             <td class="p-3">
-                <button onclick="unbanUser('${b.username}')"
-                class="bg-green-600 text-white px-3 py-1 rounded">Unban</button>
+                <button class="bg-green-600 text-white px-3 py-1 rounded" onclick="unbanUser('${b.username}')">Unban</button>
             </td>
-        </tr>
-        `;
+        </tr>`;
     });
 }
 
-// ---------------- ACTION FUNCTIONS ----------------
+// ---------- ACTIONS ----------
 async function deleteMessage(id) {
     await fetch(`${API_BASE}/messages/${id}`, {
         method: "DELETE",
-        headers: { "admin-token": ADMIN_TOKEN }
+        headers: authHeader()
     });
     loadMessages();
 }
@@ -130,10 +127,7 @@ async function deleteMessage(id) {
 async function kickUser(username) {
     await fetch(`${API_BASE}/kick`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "admin-token": ADMIN_TOKEN
-        },
+        headers: authHeader(),
         body: JSON.stringify({ username })
     });
     loadUsers();
@@ -142,10 +136,7 @@ async function kickUser(username) {
 async function banUser(username) {
     await fetch(`${API_BASE}/ban`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "admin-token": ADMIN_TOKEN
-        },
+        headers: authHeader(),
         body: JSON.stringify({ username })
     });
     loadUsers();
@@ -154,10 +145,7 @@ async function banUser(username) {
 async function unbanUser(username) {
     await fetch(`${API_BASE}/unban`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "admin-token": ADMIN_TOKEN
-        },
+        headers: authHeader(),
         body: JSON.stringify({ username })
     });
     loadBans();
