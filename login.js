@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (username === 'Admin' && password === 'testpass231') {
             localStorage.setItem('username', username);
-            window.location.href = '/chat.html';
+            window.location.href = 'chat.html';
             return;
         }
 
