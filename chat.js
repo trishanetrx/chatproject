@@ -1,24 +1,24 @@
 const socket = io("https://chatapi.copythingz.shop");
 
-// Elements
 const userList = document.getElementById("userList");
 const messages = document.getElementById("messages");
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const emojiButton = document.getElementById("emojiButton");
-const emojiPickerContainer = document.getElementById("emojiPicker");
+const emojiPicker = document.getElementById("emojiPicker");
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+const mobileSidebar = document.getElementById("mobileSidebar");
 const logoutButton = document.getElementById("logoutButton");
-const loggedInUserDisplay = document.getElementById("loggedInUser");
 
 const username = localStorage.getItem("username");
 if (!username) window.location.href = "login.html";
 
-loggedInUserDisplay.textContent = `Logged in as: ${username}`;
-socket.emit("join", username);
+console.log("Logged in as:", username);
 
-// ======================================
-// ANDROID REAL VIEWPORT HEIGHT FIX
-// ======================================
+// ------------------------------
+// REAL ANDROID VIEWPORT FIX
+// ------------------------------
 function applyRealVH() {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -27,16 +27,35 @@ applyRealVH();
 window.addEventListener("resize", applyRealVH);
 window.addEventListener("orientationchange", applyRealVH);
 
+// ------------------------------
+// SIDEBAR MOBILE TOGGLE
+// ------------------------------
+mobileSidebar.addEventListener("click", () => {
+    sidebar.classList.add("show");
+    sidebarOverlay.classList.add("show");
+});
+
+sidebarOverlay.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    sidebarOverlay.classList.remove("show");
+});
+
+// ------------------------------
 // LOGOUT
+// ------------------------------
 logoutButton.addEventListener("click", () => {
     localStorage.removeItem("username");
     window.location.href = "login.html";
 });
 
+// ------------------------------
 // EMOJI PICKER
+// ------------------------------
 let pickerVisible = false;
 
-emojiButton.addEventListener("click", () => {
+emojiButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+
     if (!pickerVisible) {
         const picker = new EmojiMart.Picker({
             theme: "dark",
@@ -46,12 +65,12 @@ emojiButton.addEventListener("click", () => {
             }
         });
 
-        emojiPickerContainer.innerHTML = "";
-        emojiPickerContainer.appendChild(picker);
-        emojiPickerContainer.classList.remove("hidden");
+        emojiPicker.innerHTML = "";
+        emojiPicker.appendChild(picker);
+        emojiPicker.classList.add("show");
         pickerVisible = true;
     } else {
-        emojiPickerContainer.classList.add("hidden");
+        emojiPicker.classList.remove("show");
         pickerVisible = false;
     }
 });
@@ -60,24 +79,25 @@ emojiButton.addEventListener("click", () => {
 document.addEventListener("click", (e) => {
     if (
         pickerVisible &&
-        !emojiPickerContainer.contains(e.target) &&
+        !emojiPicker.contains(e.target) &&
         e.target !== emojiButton
     ) {
-        emojiPickerContainer.classList.add("hidden");
+        emojiPicker.classList.remove("show");
         pickerVisible = false;
     }
 });
 
-// DYNAMIC PADDING FIX
-function fixBottomPadding() {
-    const formHeight = messageForm.offsetHeight;
-    messages.style.paddingBottom = (formHeight + 70) + "px";
-}
-setInterval(fixBottomPadding, 600);
-window.addEventListener("resize", fixBottomPadding);
-fixBottomPadding();
+// ------------------------------
+// AUTO RESIZE TEXTAREA
+// ------------------------------
+messageInput.addEventListener("input", () => {
+    messageInput.style.height = "auto";
+    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + "px";
+});
 
-// Scroll-to-bottom function
+// ------------------------------
+// SCROLL TO BOTTOM
+// ------------------------------
 function scrollToBottom(smooth = false) {
     messages.scrollTo({
         top: messages.scrollHeight,
@@ -85,81 +105,68 @@ function scrollToBottom(smooth = false) {
     });
 }
 
+// ------------------------------
 // RENDER MESSAGE
+// ------------------------------
 function renderMessage(msg) {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("message-row");
+    const row = document.createElement("div");
+    row.classList.add("message-row");
 
     const isMe = msg.username === username;
-    if (isMe) wrapper.classList.add("me");
+    if (isMe) row.classList.add("me");
 
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
 
-    bubble.style.background = isMe ? "#25D366" : "#1f1f1f";
-    bubble.style.color = isMe ? "#000" : "#fff";
-
-    let label = msg.username === "Admin" ? "🛡️ Admin" : msg.username;
-
     bubble.innerHTML = `
-        <div class="font-bold mb-1 text-sm">${label}</div>
         <div>${msg.message}</div>
+        <div class="message-meta">
+            ${new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </div>
     `;
 
-    const meta = document.createElement("div");
-    meta.classList.add("message-meta");
-    meta.textContent = new Date(msg.timestamp).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-    });
+    row.appendChild(bubble);
+    messages.appendChild(row);
 
-    wrapper.appendChild(bubble);
-    wrapper.appendChild(meta);
-
-    messages.appendChild(wrapper);
     scrollToBottom(true);
 }
 
-// CHAT HISTORY
-socket.on("chatHistory", history => {
+// ------------------------------
+// LOAD CHAT HISTORY
+// ------------------------------
+socket.on("chatHistory", (history) => {
     messages.innerHTML = "";
     history.forEach(m => renderMessage(m));
     scrollToBottom();
 });
 
-// LIVE MESSAGES
-socket.on("message", msg => {
+// ------------------------------
+// INCOMING MESSAGE
+// ------------------------------
+socket.on("message", (msg) => {
     renderMessage(msg);
 });
 
-// USERS LIST
-socket.on("updateUserList", list => {
+// ------------------------------
+// UPDATE USER LIST
+// ------------------------------
+socket.on("updateUserList", (list) => {
     userList.innerHTML = "";
 
-    if (!list.length) {
-        userList.innerHTML = `<li class="text-gray-400">No users online</li>`;
-        return;
-    }
-
-    list.forEach(name => {
+    list.forEach(user => {
         const li = document.createElement("li");
-        li.classList.add(
-            "flex", "justify-between", "items-center",
-            "bg-[#1f2937]", "p-2", "rounded", "text-white"
-        );
-
-        let label = name;
-        if (name === username) label += " (You)";
-        if (name === "Admin") label = "🛡️ Admin";
-
-        li.innerHTML = `<span>${label}</span>`;
+        li.classList.add("p-3", "border-b", "border-[var(--border)]");
+        li.textContent = user === username ? `${user} (You)` : user;
         userList.appendChild(li);
     });
 });
 
+// ------------------------------
 // SEND MESSAGE
-messageForm.addEventListener("submit", e => {
+// ------------------------------
+messageForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    
     const msg = messageInput.value.trim();
     if (!msg) return;
 
@@ -170,5 +177,7 @@ messageForm.addEventListener("submit", e => {
     });
 
     messageInput.value = "";
+    messageInput.style.height = "auto";
+
     scrollToBottom(true);
 });
