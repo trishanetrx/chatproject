@@ -1,7 +1,7 @@
 const API_BASE = "https://chatapi.copythingz.shop/api/admin";
 const ADMIN_TOKEN = "super-admin-secret";
 
-// ---------- TAB LOGIC ----------
+// ---------------- TAB SYSTEM ----------------
 const tabUsers = document.getElementById("tabUsers");
 const tabMessages = document.getElementById("tabMessages");
 const tabBans = document.getElementById("tabBans");
@@ -29,7 +29,7 @@ function switchTab(tab) {
         sectionMessages.classList.remove("hidden");
         loadMessages();
     } 
-    else if (tab === "bans") {
+    else {
         tabBans.classList.add("tab-active");
         sectionBans.classList.remove("hidden");
         loadBans();
@@ -42,8 +42,7 @@ tabBans.onclick = () => switchTab("bans");
 
 switchTab("users");
 
-
-// ---------- LOAD USERS ----------
+// ---------------- LOAD USERS ----------------
 async function loadUsers() {
     const res = await fetch(`${API_BASE}/users`, {
         headers: { "admin-token": ADMIN_TOKEN }
@@ -55,25 +54,22 @@ async function loadUsers() {
 
     users.forEach(u => {
         table.innerHTML += `
-            <tr class="border-b">
-                <td class="p-3">${u.id}</td>
-                <td class="p-3">${u.username}</td>
-                <td class="p-3 space-x-2">
-                    <button onclick="kickUser('${u.username}')"
-                        class="bg-red-500 text-white px-3 py-1 rounded">
-                        Kick
-                    </button>
-                    <button onclick="banUser('${u.username}')"
-                        class="bg-yellow-500 text-white px-3 py-1 rounded">
-                        Ban
-                    </button>
-                </td>
-            </tr>`;
+        <tr class="border-b">
+            <td class="p-3">${u.id}</td>
+            <td class="p-3">${u.username}</td>
+            <td class="p-3">
+                <button onclick="kickUser('${u.username}')" 
+                class="bg-red-500 text-white px-3 py-1 rounded">Kick</button>
+
+                <button onclick="banUser('${u.username}')" 
+                class="bg-yellow-500 text-white px-3 py-1 rounded">Ban</button>
+            </td>
+        </tr>
+        `;
     });
 }
 
-
-// ---------- LOAD MESSAGES ----------
+// ---------------- LOAD MESSAGES ----------------
 async function loadMessages() {
     const res = await fetch(`${API_BASE}/messages`, {
         headers: { "admin-token": ADMIN_TOKEN }
@@ -85,51 +81,44 @@ async function loadMessages() {
 
     messages.forEach(m => {
         table.innerHTML += `
-            <tr class="border-b">
-                <td class="p-3">${m.id}</td>
-                <td class="p-3">${m.username}</td>
-                <td class="p-3">${m.message}</td>
-                <td class="p-3">${m.timestamp}</td>
-                <td class="p-3">
-                    <button onclick="deleteMessage(${m.id})"
-                        class="bg-red-600 text-white px-3 py-1 rounded">
-                        Delete
-                    </button>
-                </td>
-            </tr>`;
+        <tr class="border-b">
+            <td class="p-3">${m.id}</td>
+            <td class="p-3">${m.username}</td>
+            <td class="p-3">${m.message}</td>
+            <td class="p-3">${m.timestamp}</td>
+            <td class="p-3">
+                <button onclick="deleteMessage(${m.id})"
+                class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+            </td>
+        </tr>
+        `;
     });
 }
 
-
-// ---------- LOAD BANNED USERS ----------
+// ---------------- LOAD BANNED USERS ----------------
 async function loadBans() {
-    const res = await fetch(`${API_BASE}/messages`, { headers: { "admin-token": ADMIN_TOKEN } });
-
-    const bansRes = await fetch(`${API_BASE.replace("messages", "bans")}`, {
+    const res = await fetch(`${API_BASE}/bans`, {
         headers: { "admin-token": ADMIN_TOKEN }
     });
 
-    const bans = await bansRes.json();
+    const bans = await res.json();
     const table = document.getElementById("bansTable");
     table.innerHTML = "";
 
     bans.forEach(b => {
         table.innerHTML += `
-            <tr class="border-b">
-                <td class="p-3">${b.username}</td>
-                <td class="p-3">
-                    <button onclick="unbanUser('${b.username}')"
-                        class="bg-green-600 text-white px-3 py-1 rounded">
-                        Unban
-                    </button>
-                </td>
-            </tr>`;
+        <tr class="border-b">
+            <td class="p-3">${b.username}</td>
+            <td class="p-3">
+                <button onclick="unbanUser('${b.username}')"
+                class="bg-green-600 text-white px-3 py-1 rounded">Unban</button>
+            </td>
+        </tr>
+        `;
     });
 }
 
-
-// ---------- ACTION FUNCTIONS ----------
-
+// ---------------- ACTION FUNCTIONS ----------------
 async function deleteMessage(id) {
     await fetch(`${API_BASE}/messages/${id}`, {
         method: "DELETE",
