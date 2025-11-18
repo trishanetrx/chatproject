@@ -30,13 +30,18 @@
 
 <style>
 
-/* Global AMOLED Black */
+/* REAL ANDROID HEIGHT FIX */
+:root {
+    --vh: 1vh;
+}
+
+/* AMOLED GLOBAL THEME */
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background: #000;
+    background: #000 !important;
     color: #fff;
-    height: 100dvh;
+    height: calc(var(--vh) * 100);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -59,7 +64,7 @@ header {
 /* MAIN LAYOUT */
 main {
     flex: 1;
-    height: calc(100dvh - 65px);
+    height: calc((var(--vh) * 100) - 65px);
     display: flex;
     overflow: hidden;
 }
@@ -71,6 +76,7 @@ aside {
     border-right: 1px solid #1f2937;
     padding: 16px;
     overflow-y: auto;
+    height: calc((var(--vh) * 100) - 65px);
 }
 
 /* CHAT SECTION */
@@ -81,20 +87,21 @@ section {
     background: #000;
 }
 
-/* MESSAGE AREA */
+/* MESSAGES */
 #messages {
     flex: 1;
     overflow-y: auto;
     padding: 18px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     width: 100%;
-    padding-bottom: 140px !important;
-    overscroll-behavior: contain;
+
+    /* Prevent bubble cut on Android/iPhone */
+    padding-bottom: max(160px, env(safe-area-inset-bottom));
 }
 
-/* MESSAGE BUBBLE CONTAINER FIX */
+/* BUBBLE CONTAINER FIX */
 .message-row {
     width: fit-content;
     max-width: calc(100% - 70px);
@@ -117,26 +124,28 @@ section {
 
 .message-bubble.me {
     background: #25D366 !important;
-    color: #000;
+    color: #000 !important;
 }
 
 /* TIMESTAMP */
 .message-meta {
-    margin-top: 3px;
     font-size: 11px;
     opacity: 0.7;
+    margin-top: 3px;
 }
 
-/* INPUT BAR — Sticky + Safe */
+/* INPUT BAR */
 #messageForm {
     background: #0a0a0a;
     border-top: 1px solid #1f1f1f;
     display: flex;
     gap: 10px;
     padding: 12px;
+
     position: sticky;
     bottom: 0;
-    z-index: 20;
+    z-index: 30;
+
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
 
@@ -145,7 +154,7 @@ section {
     padding: 12px;
     background: #1f1f1f;
     border: none;
-    color: #fff;
+    color: white;
     border-radius: 10px;
 }
 
@@ -159,7 +168,7 @@ section {
         position: fixed;
         left: -300px;
         top: 65px;
-        height: calc(100dvh - 65px);
+        width: 260px;
         transition: 0.3s;
         z-index: 200;
     }
@@ -174,7 +183,6 @@ section {
         left: 20px;
         top: 18px;
         font-size: 22px;
-        color: white;
     }
 }
 </style>
@@ -186,26 +194,31 @@ section {
     <span id="mobileSidebar"><i class="fas fa-bars"></i></span>
     <h1 class="text-lg font-bold">💬 GTM Public Chat</h1>
 
-    <button id="logoutButton" class="px-4 py-2 bg-red-500 text-white rounded">Logout</button>
+    <button id="logoutButton" class="px-4 py-2 bg-red-500 rounded text-white">
+        Logout
+    </button>
 </header>
 
 <main>
 
     <!-- SIDEBAR -->
     <aside id="sidebar">
-        <h2 class="text-md font-bold">Online Users</h2>
+        <h2 class="font-bold text-md mb-3">Online Users</h2>
         <ul id="userList"></ul>
-        <div id="loggedInUser" class="mt-4 bg-gray-800 p-2 rounded text-center text-sm"></div>
+        <div id="loggedInUser"
+             class="mt-4 bg-gray-800 p-2 rounded text-center text-sm"></div>
     </aside>
 
-    <!-- CHAT -->
+    <!-- CHAT SECTION -->
     <section>
         <div id="messages"></div>
 
         <form id="messageForm">
             <button type="button" id="emojiButton" class="bg-gray-700 px-3 py-2 rounded">😊</button>
-            <input id="messageInput" placeholder="Type a message..." autocomplete="off" required />
-            <button type="submit" class="bg-green-600 px-4 py-2 rounded text-black">Send</button>
+            <input id="messageInput" placeholder="Type a message..." required />
+            <button type="submit" class="bg-green-600 px-4 py-2 rounded text-black">
+                Send
+            </button>
             <div id="emojiPicker" class="hidden absolute bottom-16 right-2"></div>
         </form>
     </section>
