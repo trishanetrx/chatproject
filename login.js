@@ -5,71 +5,88 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
     const passwordIcon = document.getElementById('passwordIcon');
 
+    // -------------------------
+    // Password show/hide toggle
+    // -------------------------
     if (toggleButton && passwordInput && passwordIcon) {
         toggleButton.addEventListener('click', () => {
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                passwordIcon.classList.remove('fa-eye');
-                passwordIcon.classList.add('fa-eye-slash');
+                passwordIcon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passwordInput.type = 'password';
-                passwordIcon.classList.remove('fa-eye-slash');
-                passwordIcon.classList.add('fa-eye');
+                passwordIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         });
     }
 
+    // -------------------------
+    // LOGIN FORM SUBMIT
+    // -------------------------
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
 
+        // -----------------------------------
+        // MASTER ADMIN LOCAL DEV LOGIN (KEEP)
+        // -----------------------------------
         if (username === 'Admin' && password === 'testpass231') {
             localStorage.setItem('username', username);
+            localStorage.setItem('isAdmin', true);
             window.location.href = 'chat.html';
             return;
         }
 
+        // -------------------------
+        // NORMAL USER LOGIN
+        // -------------------------
         try {
             const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
+                // Login success
                 showNotification('Login successful! Redirecting...', 'success');
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('username', username);
+
+                // Save login session
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('isAdmin', data.isAdmin ? "true" : "false");
 
                 setTimeout(() => {
                     window.location.href = 'chat.html';
-                }, 2000);
+                }, 1200);
+
             } else {
                 showNotification(data.message || 'Login failed. Please try again.', 'error');
             }
+
         } catch (error) {
             console.error('Login error:', error);
-            showNotification('An error occurred. Please try again.', 'error');
+            showNotification('Server error. Try again later.', 'error');
         }
     });
 });
 
+// -------------------------
+// Notification message popup
+// -------------------------
 function showNotification(message, type) {
     const notification = document.createElement('div');
     notification.textContent = message;
-    notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
+
+    notification.className = `
+        fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white 
+        ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}
+    `;
 
     document.body.appendChild(notification);
 
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    setTimeout(() => notification.remove(), 3000);
 }
