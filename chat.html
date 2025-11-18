@@ -183,6 +183,25 @@ section {
         color: white;
     }
 }
+
+@media (max-width: 768px) {
+    main {
+        height: calc(100vh - 70px);
+        overflow-y: auto; /* allow scrolling on mobile */
+    }
+}    
+
+/* Safe area fix for Android + iPhone bottom bars */
+@supports (padding: max(0px)) {
+    #messageForm {
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+    
 </style>
 </head>
 
