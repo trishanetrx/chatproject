@@ -9,9 +9,9 @@ const server = http.createServer(app);
 
 // Allowed Origins
 const allowedOrigins = [
-    'https://negombotech.com',
-    'https://chat.negombotech.com',
-    'https://api.negombotech.com'
+    'https://copythingz.shop',
+    'https://chat.copythingz.shop',
+    'https://chatapi.copythingz.shop'
 ];
 
 // CORS Middleware for Express
