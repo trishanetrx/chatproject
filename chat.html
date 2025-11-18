@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<script>
+    if (!localStorage.getItem("chatUser")) {
+        window.location.href = "login.html";
+    }
+</script>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
