@@ -11,7 +11,12 @@ if (!localStorage.getItem("adminToken")) {
     window.location.href = "admin-login.html";
 }
 
-// TAB SETUP
+function logout() {
+    localStorage.removeItem("adminToken");
+    window.location.href = "admin-login.html";
+}
+
+// ------------------ TAB SYSTEM ------------------
 const tabUsers = document.getElementById("tabUsers");
 const tabMessages = document.getElementById("tabMessages");
 const tabBans = document.getElementById("tabBans");
@@ -52,29 +57,44 @@ tabBans.onclick = () => switchTab("bans");
 
 switchTab("users");
 
-// ---------------- USERS (ONLINE) ----------------
+// ------------------ LOAD USERS (Combined) ------------------
 async function loadUsers() {
-    const res = await fetch(`${API_BASE}/online-users`, { headers: authHeader() });
-    const users = await res.json();
+    const regRes = await fetch(`${API_BASE}/users`, { headers: authHeader() });
+    const onlineRes = await fetch(`${API_BASE}/online-users`, { headers: authHeader() });
+
+    const registered = await regRes.json();
+    const online = await onlineRes.json();
 
     const table = document.getElementById("usersTable");
     table.innerHTML = "";
 
-    users.forEach(username => {
+    registered.forEach(user => {
+        const isOnline = online.includes(user.username);
+
         table.innerHTML += `
         <tr class="border-b">
-            <td class="p-3">${username}</td>
             <td class="p-3">
-                <button class="bg-red-500 text-white px-3 py-1 rounded"
-                    onclick="kickUser('${username}')">Kick</button>
-                <button class="bg-yellow-500 text-white px-3 py-1 rounded"
-                    onclick="banUser('${username}')">Ban</button>
+                <span class="${isOnline ? "dot-online" : "dot-offline"}"></span>
+            </td>
+
+            <td class="p-3">${user.username}</td>
+
+            <td class="p-3">
+                ${isOnline ? `
+                    <button onclick="kickUser('${user.username}')"
+                        class="bg-red-500 text-white px-3 py-1 rounded">Kick</button>
+                ` : ``}
+
+                <button onclick="banUser('${user.username}')"
+                    class="bg-yellow-500 text-white px-3 py-1 rounded ml-2">
+                    Ban
+                </button>
             </td>
         </tr>`;
     });
 }
 
-// ---------------- MESSAGES ----------------
+// ------------------ LOAD MESSAGES ------------------
 async function loadMessages() {
     const res = await fetch(`${API_BASE}/messages`, { headers: authHeader() });
     const messages = await res.json();
@@ -90,14 +110,16 @@ async function loadMessages() {
             <td class="p-3">${m.message}</td>
             <td class="p-3">${m.timestamp}</td>
             <td class="p-3">
-                <button class="bg-red-600 text-white px-3 py-1 rounded"
-                    onclick="deleteMessage(${m.id})">Delete</button>
+                <button onclick="deleteMessage(${m.id})"
+                    class="bg-red-600 text-white px-3 py-1 rounded">
+                    Delete
+                </button>
             </td>
         </tr>`;
     });
 }
 
-// ---------------- BANS ----------------
+// ------------------ BANS ------------------
 async function loadBans() {
     const res = await fetch(`${API_BASE}/bans`, { headers: authHeader() });
     const bans = await res.json();
@@ -109,15 +131,18 @@ async function loadBans() {
         table.innerHTML += `
         <tr class="border-b">
             <td class="p-3">${b.username}</td>
+
             <td class="p-3">
-                <button class="bg-green-600 text-white px-3 py-1 rounded"
-                    onclick="unbanUser('${b.username}')">Unban</button>
+                <button onclick="unbanUser('${b.username}')"
+                    class="bg-green-600 text-white px-3 py-1 rounded">
+                    Unban
+                </button>
             </td>
         </tr>`;
     });
 }
 
-// ---------------- ACTIONS ----------------
+// ------------------ ACTIONS ------------------
 async function deleteMessage(id) {
     await fetch(`${API_BASE}/messages/${id}`, {
         method: "DELETE",
