@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <meta name="theme-color" content="#0B141A" />
     <title>GTM Public Chat</title>
 
-    <!-- Auth redirect -->
+    <!-- Redirect if not logged in -->
     <script>
         if (!localStorage.getItem("username")) {
             window.location.href = "login.html";
@@ -17,34 +17,32 @@
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonts / Icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Fonts -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- Socket.io -->
     <script src="https://chatapi.copythingz.shop/socket.io/socket.io.js"></script>
 
     <!-- Emoji Picker -->
     <script src="https://unpkg.com/emoji-mart@latest/dist/browser.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
+    <link rel="stylesheet"
+          href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css" />
 
 <style>
-
-/* REAL ANDROID VIEWPORT HEIGHT FIX */
 :root {
     --vh: 1vh;
-}
-
-/* WHATSAPP COLORS */
-:root {
     --bg: #0B141A;
     --chat-bg: #111B21;
     --bubble-in: #202C33;
     --bubble-out: #005C4B;
-    --green: #25D366;
     --header: #202C33;
-    --input-bg: #2A3942;
     --border: #1F2A30;
+    --input-bg: #2A3942;
     --text: #E9EDEF;
     --text-secondary: #8696A0;
 }
@@ -62,7 +60,6 @@ body {
     overflow: hidden;
 }
 
-/* HEADER */
 header {
     height: 60px;
     background: var(--header);
@@ -70,11 +67,10 @@ header {
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
-    z-index: 50;
     border-bottom: 1px solid var(--border);
+    z-index: 50;
 }
 
-/* LAYOUT */
 main {
     flex: 1;
     height: calc((var(--vh) * 100) - 60px);
@@ -82,42 +78,34 @@ main {
     overflow: hidden;
 }
 
-/* SIDEBAR */
 aside {
     width: 280px;
     background: var(--bg);
     border-right: 1px solid var(--border);
-    height: calc((var(--vh) * 100) - 60px);
     overflow-y: auto;
+    height: calc((var(--vh) * 100) - 60px);
     transition: transform 0.3s ease;
 }
 
-aside.show {
-    transform: translateX(0);
-}
+aside.show { transform: translateX(0); }
 
 .sidebar-overlay {
     display: none;
-    background: rgba(0,0,0,0.5);
     position: fixed;
     inset: 60px 0 0 0;
+    background: rgba(0,0,0,0.5);
     z-index: 49;
 }
 
-.sidebar-overlay.show {
-    display: block;
-}
+.sidebar-overlay.show { display: block; }
 
-/* CHAT AREA */
 .chat-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     background: var(--chat-bg);
-    position: relative;
 }
 
-/* MESSAGES */
 #messages {
     flex: 1;
     overflow-y: auto;
@@ -126,27 +114,18 @@ aside.show {
     flex-direction: column;
     gap: 12px;
 
-    /* Prevent bubble clipping */
-    padding-bottom: 160px;
-}
-
-/* SMOOTH SCROLLBAR */
-#messages::-webkit-scrollbar {
-    width: 6px;
-}
-#messages::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.15);
-    border-radius: 4px;
+    /* bubble safety */
+    padding-bottom: 140px;
 }
 
 /* BUBBLE ROW */
 .message-row {
     display: flex;
     flex-direction: column;
-
-    /* FINAL CUT-OFF FIX */
-    max-width: calc(100% - 48px);
     width: fit-content;
+
+    /* final no-cut fix */
+    max-width: calc(100% - 48px);
 }
 
 .message-row.me {
@@ -157,10 +136,10 @@ aside.show {
 .message-bubble {
     padding: 10px 12px;
     border-radius: 10px;
-    word-break: break-word;
-    font-size: 14px;
     background: var(--bubble-in);
     color: var(--text);
+    word-break: break-word;
+    font-size: 14px;
 }
 
 .message-row.me .message-bubble {
@@ -170,9 +149,9 @@ aside.show {
 
 /* TIMESTAMP */
 .message-meta {
+    margin-top: 4px;
     font-size: 11px;
     opacity: 0.7;
-    margin-top: 4px;
     text-align: right;
 }
 
@@ -186,50 +165,88 @@ aside.show {
     align-items: flex-end;
     position: sticky;
     bottom: 0;
-    z-index: 20;
 }
 
 #messageInput {
     flex: 1;
-    background: var(--input-bg);
-    color: var(--text);
     padding: 10px 14px;
-    font-size: 15px;
     border-radius: 22px;
+    background: var(--input-bg);
     border: none;
     outline: none;
+    color: var(--text);
     resize: none;
-    max-height: 120px;
+    font-size: 15px;
 }
 
 .input-button {
-    color: var(--text-secondary);
-    font-size: 24px;
     background: none;
     border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
     padding: 6px;
 }
 
 /* EMOJI PICKER */
 #emojiPicker {
     position: absolute;
-    bottom: 60px;
     right: 12px;
+    bottom: 60px;
     display: none;
     z-index: 999;
 }
 
-#emojiPicker.show {
-    display: block;
+#emojiPicker.show { display: block; }
+
+/* USER LIST */
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--bubble-out);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: white;
+}
+
+.user-info { flex: 1; }
+
+.user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.user-badge {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.online-indicator {
+    width: 10px;
+    height: 10px;
+    background: var(--green);
+    border-radius: 50%;
 }
 
 /* MOBILE */
 @media (max-width: 900px) {
     aside {
         position: fixed;
-        transform: translateX(-100%);
         left: 0;
         top: 60px;
+        transform: translateX(-100%);
         z-index: 100;
     }
 }
@@ -244,7 +261,8 @@ aside.show {
         <h1 class="text-lg font-semibold">💬 GTM Public Chat</h1>
     </div>
 
-    <button id="logoutButton" class="px-4 py-2 bg-red-600 rounded text-white text-sm">
+    <button id="logoutButton"
+            class="px-4 py-2 bg-red-600 rounded text-white text-sm">
         Logout
     </button>
 </header>
@@ -257,7 +275,7 @@ aside.show {
         <div class="p-4 border-b border-[var(--border)] text-lg font-semibold">
             Online Users
         </div>
-        <ul id="userList" class="p-2"></ul>
+        <ul id="userList"></ul>
     </aside>
 
     <section class="chat-container">
@@ -265,7 +283,10 @@ aside.show {
 
         <form id="messageForm">
             <button type="button" id="emojiButton" class="input-button">😊</button>
-            <textarea id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+
+            <textarea id="messageInput" rows="1"
+                      placeholder="Type a message..."></textarea>
+
             <button type="submit" id="sendButton" class="input-button">
                 <i class="fas fa-paper-plane"></i>
             </button>
