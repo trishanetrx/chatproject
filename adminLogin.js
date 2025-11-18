@@ -1,19 +1,37 @@
-document.getElementById("loginBtn").addEventListener("click", async () => {
+const API_URL = "https://chatapi.copythingz.shop/api/admin/login";
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    const res = await fetch("https://chatapi.copythingz.shop/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-    });
+    const errorBox = document.getElementById("errorBox");
+    errorBox.classList.add("hidden");
 
-    const data = await res.json();
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
 
-    if (data.token) {
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorBox.textContent = data.message || "Invalid login";
+            errorBox.classList.remove("hidden");
+            return;
+        }
+
+        // Save JWT
         localStorage.setItem("adminToken", data.token);
+
+        // Redirect to dashboard
         window.location.href = "admin.html";
-    } else {
-        document.getElementById("status").innerText = data.message || "Login failed";
+
+    } catch (err) {
+        errorBox.textContent = "Server error";
+        errorBox.classList.remove("hidden");
     }
 });
