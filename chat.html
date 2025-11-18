@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GTM Public Chat</title>
 
     <!-- Redirect if not logged in -->
@@ -15,220 +15,114 @@
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind config (REQUIRED for dark mode) -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+        };
+    </script>
 
-    <!-- Socket -->
+    <!-- Icons & Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+
+    <!-- Socket.io -->
     <script src="https://chatapi.copythingz.shop/socket.io/socket.io.js"></script>
 
     <!-- Emoji Picker -->
     <script src="https://unpkg.com/emoji-mart@latest/dist/browser.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/emoji-mart@latest/css/emoji-mart.css"/>
 
     <style>
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            color: #e2e8f0;
-            overflow: hidden; /* prevents double scroll on mobile */
+            overflow: hidden;
         }
 
-        /* HEADER FIXED LIKE WHATSAPP */
-        header {
-            height: 70px;
-            width: 100%;
-            background: rgba(255,255,255,0.1);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(14px);
-            position: fixed;
-            top: 0;
+        /* SIDEBAR MOBILE ANIMATION */
+        #sidebar {
+            transition: left 0.3s ease;
+        }
+
+        #sidebar.open {
             left: 0;
-            z-index: 1000;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
         }
 
-        main {
-            position: absolute;
-            top: 70px;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            display: flex;
-            overflow: hidden;
-            padding: 12px;
-            gap: 12px;
-        }
-
-        /* DESKTOP SIDEBAR */
-        aside {
-            width: 260px;
-            background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(12px);
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* User list scroll */
-        #userList {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 10px;
-            padding-right: 4px;
-        }
-
-        #userList li {
-            padding: 10px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.09);
-            border-radius: 10px;
-        }
-
-        /* CHAT SECTION */
-        section {
-            flex: 1;
-            background: rgba(255,255,255,0.07);
-            border-radius: 14px;
-            backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message-row {
-            max-width: 70%;
-            display: flex;
-            flex-direction: column;
-        }
-        .message-row.me {
-            align-self: flex-end;
-        }
-        .message-bubble {
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.1);
-        }
-        .message-bubble.me {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-        }
-        .message-meta {
-            margin-top: 4px;
-            opacity: 0.6;
-            font-size: 11px;
-        }
-
-        /* INPUT BAR FIXED INSIDE SECTION */
-        #messageForm {
-            flex-shrink: 0;
-            padding: 16px;
-            display: flex;
-            gap: 10px;
-            background: rgba(0,0,0,0.25);
-        }
-
-        #messageInput {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.09);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: white;
-        }
-
-        /* MOBILE: SIDEBAR HIDDEN */
-        @media (max-width: 900px) {
-            aside {
-                position: fixed;
-                top: 70px;
-                left: -270px;
-                height: calc(100% - 70px);
-                z-index: 1500;
-                width: 260px;
-                transition: left 0.3s ease;
-            }
-            aside.open {
-                left: 0;
-            }
-
-            /* overlay */
-            #overlay {
-                position: fixed;
-                top: 70px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0,0,0,0.5);
-                z-index: 1400;
-            }
-        }
+        /* Chat bubbles */
+        .bubble-me-light { background-color: #DCF8C6; color: #111; }
+        .bubble-me-dark { background-color: #25D366; color: #000; }
+        .bubble-other-light { background-color: #fff; color: #111; }
+        .bubble-other-dark { background-color: #1F1F1F; color: #fff; }
     </style>
 </head>
 
-<body>
+<body class="bg-[#ECE5DD] dark:bg-black text-black dark:text-white">
 
-<!-- HEADER -->
-<header>
-    <!-- Mobile Users Button (WhatsApp style) -->
-    <button id="mobileMenuBtn"
-        class="text-white text-2xl font-bold lg:hidden">☰</button>
+<!-- HEADER (WhatsApp style) -->
+<header class="fixed top-0 left-0 w-full h-[60px] bg-white dark:bg-black border-b border-gray-300 dark:border-[#222] z-[1000] 
+flex items-center justify-between px-3">
 
-    <h1 class="font-bold text-lg">GTM Public Chat</h1>
+    <button id="mobileMenuBtn" class="text-3xl font-bold lg:hidden text-black dark:text-white">
+        ☰
+    </button>
 
-    <div class="flex items-center gap-3">
-        <button id="logoutButton"
-            class="px-4 py-2 bg-red-500 rounded-md text-white">Logout</button>
-    </div>
+    <h1 class="font-semibold text-lg text-black dark:text-white">GTM Public Chat</h1>
+
+    <button id="themeToggle" class="text-xl px-3 py-1 dark:text-white">
+        🌙
+    </button>
+
+    <button id="logoutButton" class="px-3 py-1 bg-red-500 text-white rounded">
+        Logout
+    </button>
 </header>
 
+<!-- MAIN CONTAINER -->
+<main class="absolute top-[60px] left-0 right-0 bottom-0 flex overflow-hidden">
 
-<!-- MAIN -->
-<main>
     <!-- SIDEBAR -->
-    <aside id="sidebar">
-        <h2 class="font-bold text-lg">Online Users</h2>
-        <ul id="userList"></ul>
-        <div id="loggedInUser" class="mt-4 bg-white/10 p-2 text-center rounded text-sm"></div>
+    <aside
+        id="sidebar"
+        class="w-[260px] bg-white dark:bg-black border-r border-gray-300 dark:border-[#222]
+        p-3 hidden lg:flex flex-col overflow-hidden lg:static fixed top-[60px] left-[-260px] h-[calc(100%-60px)] z-[1500]">
+
+        <h2 class="font-bold mb-3 text-black dark:text-white">Online Users</h2>
+
+        <ul id="userList" class="flex-1 overflow-y-auto space-y-2 pr-1"></ul>
+
+        <div id="loggedInUser"
+             class="mt-3 text-center bg-gray-100 dark:bg-[#111] p-2 rounded text-sm text-gray-700 dark:text-gray-300">
+        </div>
     </aside>
 
+    <!-- OVERLAY (mobile only) -->
+    <div id="overlay" class="hidden fixed top-[60px] left-0 right-0 bottom-0 bg-black/50 z-[1400]"></div>
+
     <!-- CHAT SECTION -->
-    <section>
-        <div id="messages"></div>
+    <section class="flex-1 flex flex-col bg-[#ECE5DD] dark:bg-black">
 
-        <!-- INPUT -->
-        <form id="messageForm" class="relative">
-            <button type="button" id="emojiButton"
-                class="px-3 py-2 bg-purple-600 text-white rounded">😊</button>
+        <!-- MESSAGES -->
+        <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
 
-            <input id="messageInput" placeholder="Type a message..." autocomplete="off" required />
+        <!-- INPUT BAR -->
+        <form id="messageForm" class="p-3 flex gap-2 items-center bg-white dark:bg-black border-t border-gray-300 dark:border-[#222]">
 
-            <button type="submit"
-                class="px-4 py-2 bg-green-500 text-white rounded">Send</button>
+            <button type="button" id="emojiButton" class="text-2xl">😊</button>
 
-            <div id="emojiPicker" class="hidden absolute bottom-16 left-3 z-50"></div>
+            <input
+                id="messageInput"
+                class="flex-1 bg-white dark:bg-[#111] text-black dark:text-white p-2 rounded border border-gray-300 dark:border-[#333]"
+                placeholder="Type a message..."
+                autocomplete="off"
+                required
+            />
+
+            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">
+                Send
+            </button>
+
+            <div id="emojiPicker" class="absolute bottom-[70px] left-3 z-[2000] hidden"></div>
         </form>
     </section>
-</main>
 
-<!-- OVERLAY FOR MOBILE -->
-<div id="overlay" class="hidden"></div>
+</main>
 
 <script src="chat.js"></script>
 
