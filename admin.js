@@ -1,22 +1,24 @@
-const API_BASE = "https://chatapi.copythingz.shop/api/admin";
+const API_BASE = "https://chatapi.copythingz.shop/api";
 
-function authHeader() {
-    return {
-        "Authorization": "Bearer " + localStorage.getItem("adminToken"),
-        "Content-Type": "application/json"
-    };
-}
+// ================================
+//  AUTH CHECK
+// ================================
+const adminToken = localStorage.getItem("adminToken");
 
-if (!localStorage.getItem("adminToken")) {
+if (!adminToken) {
+    alert("Access denied. Please login again.");
     window.location.href = "admin-login.html";
 }
 
+// LOGOUT
 function logout() {
     localStorage.removeItem("adminToken");
     window.location.href = "admin-login.html";
 }
 
-// ------------------ TAB SYSTEM ------------------
+// ================================
+//  TABS
+// ================================
 const tabUsers = document.getElementById("tabUsers");
 const tabMessages = document.getElementById("tabMessages");
 const tabBans = document.getElementById("tabBans");
@@ -37,143 +39,200 @@ function switchTab(tab) {
     if (tab === "users") {
         tabUsers.classList.add("tab-active");
         sectionUsers.classList.remove("hidden");
-        loadUsers();
     }
     if (tab === "messages") {
         tabMessages.classList.add("tab-active");
         sectionMessages.classList.remove("hidden");
-        loadMessages();
     }
     if (tab === "bans") {
         tabBans.classList.add("tab-active");
         sectionBans.classList.remove("hidden");
-        loadBans();
     }
 }
 
-tabUsers.onclick = () => switchTab("users");
-tabMessages.onclick = () => switchTab("messages");
-tabBans.onclick = () => switchTab("bans");
+tabUsers.addEventListener("click", () => switchTab("users"));
+tabMessages.addEventListener("click", () => switchTab("messages"));
+tabBans.addEventListener("click", () => switchTab("bans"));
 
-switchTab("users");
+// ================================
+//  API WRAPPER
+// ================================
+async function api(url, method = "GET", body = null) {
+    const options = {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + adminToken
+        }
+    };
+    if (body) options.body = JSON.stringify(body);
 
-// ------------------ LOAD USERS (Combined) ------------------
-async function loadUsers() {
-    const regRes = await fetch(`${API_BASE}/users`, { headers: authHeader() });
-    const onlineRes = await fetch(`${API_BASE}/online-users`, { headers: authHeader() });
-
-    const registered = await regRes.json();
-    const online = await onlineRes.json();
-
-    const table = document.getElementById("usersTable");
-    table.innerHTML = "";
-
-    registered.forEach(user => {
-        const isOnline = online.includes(user.username);
-
-        table.innerHTML += `
-        <tr class="border-b">
-            <td class="p-3">
-                <span class="${isOnline ? "dot-online" : "dot-offline"}"></span>
-            </td>
-
-            <td class="p-3">${user.username}</td>
-
-            <td class="p-3">
-                ${isOnline ? `
-                    <button onclick="kickUser('${user.username}')"
-                        class="bg-red-500 text-white px-3 py-1 rounded">Kick</button>
-                ` : ``}
-
-                <button onclick="banUser('${user.username}')"
-                    class="bg-yellow-500 text-white px-3 py-1 rounded ml-2">
-                    Ban
-                </button>
-            </td>
-        </tr>`;
-    });
+    const res = await fetch(API_BASE + url, options);
+    return res.json();
 }
 
-// ------------------ LOAD MESSAGES ------------------
-async function loadMessages() {
-    const res = await fetch(`${API_BASE}/messages`, { headers: authHeader() });
-    const messages = await res.json();
+// ================================
+//  LOAD USERS
+// ================================
+async function loadUsers() {
+    const usersTable = document.getElementById("usersTable");
+    usersTable.innerHTML = "<tr><td colspan='3' class='p-4 text-center'>Loading...</td></tr>";
 
-    const table = document.getElementById("messagesTable");
-    table.innerHTML = "";
+    const users = await api("/admin/all-users");
 
-    messages.forEach(m => {
-        table.innerHTML += `
-        <tr class="border-b">
-            <td class="p-3">${m.id}</td>
-            <td class="p-3">${m.username}</td>
-            <td class="p-3">${m.message}</td>
-            <td class="p-3">${m.timestamp}</td>
-            <td class="p-3">
-                <button onclick="deleteMessage(${m.id})"
-                    class="bg-red-600 text-white px-3 py-1 rounded">
+    usersTable.innerHTML = "";
+
+    users.forEach(user => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-gray-50";
+
+        const isOnline = user.is_online === 1;
+
+        tr.innerHTML = `
+            <td class="p-4">
+                <span class="${isOnline ? "dot-online" : "dot-offline"}"></span>
+            </td>
+            <td class="p-4 font-medium">${user.username}</td>
+            <td class="p-4 space-x-2">
+                <button onclick="kickUser('${user.username}')" 
+                    class="px-3 py-1 bg-yellow-500 text-white rounded shadow hover:bg-yellow-600">
+                    Kick
+                </button>
+
+                <button onclick="banUser('${user.username}')" 
+                    class="px-3 py-1 bg-red-500 text-white rounded shadow hover:bg-red-600">
+                    Ban
+                </button>
+
+                <button onclick="deleteUser(${user.id})" 
+                    class="px-3 py-1 bg-gray-700 text-white rounded shadow hover:bg-gray-900">
                     Delete
                 </button>
             </td>
-        </tr>`;
+        `;
+
+        usersTable.appendChild(tr);
     });
 }
 
-// ------------------ BANS ------------------
+// ================================
+//  DELETE USER
+// ================================
+async function deleteUser(id) {
+    if (!confirm("Delete this user?")) return;
+
+    await api(`/admin/users/${id}`, "DELETE");
+    loadUsers();
+}
+
+// ================================
+//  BAN USER
+// ================================
+async function banUser(username) {
+    await api("/admin/ban", "POST", { username });
+    loadUsers();
+    loadBans();
+}
+
+// ================================
+//  UNBAN USER
+// ================================
+async function unbanUser(username) {
+    await api("/admin/unban", "POST", { username });
+    loadBans();
+}
+
+// ================================
+//  KICK USER
+// ================================
+async function kickUser(username) {
+    await api("/admin/kick", "POST", { username });
+    loadUsers();
+}
+
+// ================================
+//  LOAD BANNED USERS
+// ================================
 async function loadBans() {
-    const res = await fetch(`${API_BASE}/bans`, { headers: authHeader() });
-    const bans = await res.json();
+    const bansTable = document.getElementById("bansTable");
 
-    const table = document.getElementById("bansTable");
-    table.innerHTML = "";
+    bansTable.innerHTML = "<tr><td colspan='2' class='p-4 text-center'>Loading...</td></tr>";
 
-    bans.forEach(b => {
-        table.innerHTML += `
-        <tr class="border-b">
-            <td class="p-3">${b.username}</td>
+    const bans = await api("/admin/bans");
 
-            <td class="p-3">
-                <button onclick="unbanUser('${b.username}')"
-                    class="bg-green-600 text-white px-3 py-1 rounded">
+    bansTable.innerHTML = "";
+
+    bans.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-gray-50";
+
+        tr.innerHTML = `
+            <td class="p-4 font-medium">${row.username}</td>
+            <td class="p-4">
+                <button onclick="unbanUser('${row.username}')" 
+                    class="px-3 py-1 bg-green-500 text-white rounded shadow hover:bg-green-600">
                     Unban
                 </button>
             </td>
-        </tr>`;
+        `;
+
+        bansTable.appendChild(tr);
     });
 }
 
-// ------------------ ACTIONS ------------------
-async function deleteMessage(id) {
-    await fetch(`${API_BASE}/messages/${id}`, {
-        method: "DELETE",
-        headers: authHeader()
+// ================================
+//  LOAD MESSAGES
+// ================================
+async function loadMessages() {
+    const messagesTable = document.getElementById("messagesTable");
+    messagesTable.innerHTML = "<tr><td colspan='5' class='p-4 text-center'>Loading...</td></tr>";
+
+    const messages = await api("/admin/messages");
+
+    messagesTable.innerHTML = "";
+
+    messages.forEach(m => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td class="p-4">${m.id}</td>
+            <td class="p-4">${m.username}</td>
+            <td class="p-4">${m.message}</td>
+            <td class="p-4">${m.timestamp}</td>
+            <td class="p-4">
+                <button onclick="deleteMessage(${m.id})"
+                    class="px-3 py-1 bg-red-500 text-white rounded shadow hover:bg-red-600">
+                    Delete
+                </button>
+            </td>
+        `;
+
+        messagesTable.appendChild(tr);
     });
+}
+
+// ================================
+//  DELETE MESSAGE
+// ================================
+async function deleteMessage(id) {
+    if (!confirm("Delete this message?")) return;
+
+    await api(`/admin/messages/${id}`, "DELETE");
     loadMessages();
 }
 
-async function kickUser(username) {
-    await fetch(`${API_BASE}/kick`, {
-        method: "POST",
-        headers: authHeader(),
-        body: JSON.stringify({ username })
-    });
+// ================================
+//  AUTO-REFRESH EVERY 3 SECONDS
+// ================================
+setInterval(() => {
     loadUsers();
-}
-
-async function banUser(username) {
-    await fetch(`${API_BASE}/ban`, {
-        method: "POST",
-        headers: authHeader(),
-        body: JSON.stringify({ username })
-    });
-    loadUsers();
-}
-
-async function unbanUser(username) {
-    await fetch(`${API_BASE}/unban`, {
-        method: "POST",
-        headers: authHeader(),
-        body: JSON.stringify({ username })
-    });
     loadBans();
-}
+    loadMessages();
+}, 3000);
+
+// ================================
+//  INITIAL LOAD
+// ================================
+loadUsers();
+loadBans();
+loadMessages();
