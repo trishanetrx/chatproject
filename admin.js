@@ -122,7 +122,7 @@ async function deleteUser(id) {
     if (!confirm("Delete this user?")) return;
 
     await api(`/admin/users/${id}`, "DELETE");
-    loadUsers();
+    await loadUsers(); // Refresh only users after deletion
 }
 
 // ================================
@@ -130,8 +130,8 @@ async function deleteUser(id) {
 // ================================
 async function banUser(username) {
     await api("/admin/ban", "POST", { username });
-    loadUsers();
-    loadBans();
+    await loadUsers(); // Refresh users
+    await loadBans();  // Refresh bans
 }
 
 // ================================
@@ -139,7 +139,8 @@ async function banUser(username) {
 // ================================
 async function unbanUser(username) {
     await api("/admin/unban", "POST", { username });
-    loadBans();
+    await loadBans();  // Refresh only bans
+    await loadUsers(); // Also refresh users in case they come back online
 }
 
 // ================================
@@ -147,7 +148,7 @@ async function unbanUser(username) {
 // ================================
 async function kickUser(username) {
     await api("/admin/kick", "POST", { username });
-    loadUsers();
+    await loadUsers(); // Refresh only users after kick
 }
 
 // ================================
@@ -218,17 +219,20 @@ async function deleteMessage(id) {
     if (!confirm("Delete this message?")) return;
 
     await api(`/admin/messages/${id}`, "DELETE");
-    loadMessages();
+    await loadMessages(); // Refresh only messages after deletion
 }
 
 // ================================
-//  AUTO-REFRESH EVERY 3 SECONDS
+//  MANUAL REFRESH FUNCTIONS
 // ================================
-setInterval(() => {
+function refreshAll() {
     loadUsers();
     loadBans();
     loadMessages();
-}, 3000);
+}
+
+// Make it available globally for the HTML button
+window.refreshAll = refreshAll;
 
 // ================================
 //  INITIAL LOAD
@@ -236,3 +240,6 @@ setInterval(() => {
 loadUsers();
 loadBans();
 loadMessages();
+
+// REMOVED: Auto-refresh interval
+// Now data only refreshes when you take an action or click the refresh button
