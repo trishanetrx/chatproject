@@ -112,9 +112,17 @@
     <!-- MESSAGES SECTION -->
     <div id="sectionMessages" class="max-w-7xl mx-auto p-6 hidden">
         <div class="glass-effect rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
-                <h2 class="text-2xl font-bold text-white">Messages Overview</h2>
-                <p class="text-blue-100 mt-1">Review all messages from users</p>
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Messages Overview</h2>
+                    <p class="text-blue-100 mt-1">Review all messages from users</p>
+                </div>
+                <button onclick="deleteAllMessages()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span>Delete All</span>
+                </button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -377,6 +385,25 @@
 
             await api(`/admin/messages/${id}`, "DELETE");
             await loadMessages();
+        }
+
+        // ================================
+        //  DELETE ALL MESSAGES
+        // ================================
+        async function deleteAllMessages() {
+            if (!confirm("⚠️ WARNING: Delete ALL messages? This cannot be undone!")) return;
+            
+            // Double confirmation for safety
+            if (!confirm("Are you absolutely sure? This will permanently delete ALL messages!")) return;
+
+            try {
+                await api("/admin/messages/delete-all", "DELETE");
+                alert("All messages have been deleted successfully.");
+                await loadMessages();
+            } catch (error) {
+                alert("Failed to delete all messages. Please try again.");
+                console.error(error);
+            }
         }
 
         // ================================
