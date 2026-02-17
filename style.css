@@ -24,6 +24,7 @@ body {
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
     /* Chat specific body styles that are safe for others */
     display: flex;
