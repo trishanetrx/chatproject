@@ -414,6 +414,30 @@ io.on('connection', (socket) => {
         io.emit("message", data);
     });
 
+    socket.on("private_message", ({ to, message }) => {
+        if (!to || !message) return;
+
+        const recipientSocket = onlineUsers.get(to);
+        const timestamp = new Date().toISOString();
+
+        if (recipientSocket) {
+            // 1. Send to Recipient
+            recipientSocket.emit("private_message", {
+                from: socket.username,
+                message: message,
+                timestamp: timestamp
+            });
+
+            // 2. Send back to Sender (so it shows in their UI)
+            socket.emit("private_message", {
+                from: socket.username,
+                to: to,
+                message: message,
+                timestamp: timestamp
+            });
+        }
+    });
+
     socket.on("disconnect", () => {
         onlineUsers.delete(socket.username);
 

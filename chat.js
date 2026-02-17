@@ -11,9 +11,14 @@ const sidebar = document.getElementById("sidebar");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
 const mobileSidebar = document.getElementById("mobileSidebar");
 const logoutButton = document.getElementById("logoutButton");
+const replyIndicator = document.getElementById("replyIndicator");
+const replyName = document.getElementById("replyName");
+const closeReply = document.getElementById("closeReply");
 
 const username = localStorage.getItem("username");
 if (!username) window.location.href = "login.html";
+
+let currentRecipient = null;
 
 // ------------------------------------------------------
 // ANDROID SAFE HEIGHT FIX
@@ -45,6 +50,28 @@ logoutButton.addEventListener("click", () => {
     localStorage.clear();
     window.location.href = "login.html";
 });
+
+// ------------------------------------------------------
+// REPLY LOGIC
+// ------------------------------------------------------
+function setRecipient(name) {
+    if (name === username || name === "System") return;
+    currentRecipient = name;
+    replyName.textContent = name;
+    replyIndicator.classList.add("show");
+    messageInput.focus();
+
+    // Mobile: close sidebar
+    sidebar.classList.remove("show");
+    sidebarOverlay.classList.remove("show");
+}
+
+function clearRecipient() {
+    currentRecipient = null;
+    replyIndicator.classList.remove("show");
+}
+
+closeReply.addEventListener("click", clearRecipient);
 
 // ------------------------------------------------------
 // EMOJI PICKER
@@ -103,7 +130,7 @@ function scrollToBottom(smooth = false) {
 }
 
 // ------------------------------------------------------
-// RENDER MESSAGE (Original logic merged)
+// RENDER MESSAGE
 // ------------------------------------------------------
 function formatTime(ts) {
     try {
@@ -114,10 +141,12 @@ function formatTime(ts) {
     }
 }
 
-function renderMessage(data) {
-    if (!data || !data.username || typeof data.message !== "string") return;
+function renderMessage(data, isPrivate = false) {
+    if (!data || !data.message) return;
 
-    const isMe = data.username === username;
+    // Use 'from' for PMs, 'username' for Public
+    const senderName = data.from || data.username;
+    const isMe = senderName === username;
 
     const row = document.createElement("div");
     row.classList.add("message-row");
@@ -125,12 +154,29 @@ function renderMessage(data) {
 
     const bubble = document.createElement("div");
     bubble.classList.add("message-bubble");
+    if (isPrivate) bubble.classList.add("private");
 
-    // NAME (Admin orange, You label)
+    // NAME
     const nameEl = document.createElement("div");
     nameEl.classList.add("message-username");
-    if (data.username === "Admin") nameEl.style.color = "#f97316";
-    nameEl.textContent = isMe ? `${data.username} (You)` : data.username;
+
+    // Style Admin
+    if (senderName === "Admin") nameEl.style.color = "#f97316";
+
+    // Format Name
+    let displayName = senderName;
+    if (isMe) displayName += " (You)";
+
+    // Private Label
+    if (isPrivate) {
+        if (isMe && data.to) {
+            displayName += ` ➝ ${data.to}`;
+        } else {
+            displayName += ` (Private)`;
+        }
+    }
+
+    nameEl.textContent = displayName;
 
     // TEXT
     const textEl = document.createElement("div");
@@ -152,7 +198,7 @@ function renderMessage(data) {
 }
 
 // ------------------------------------------------------
-// REQUEST USER LIST ON CONNECT (Admin compatibility)
+// REQUEST USER LIST ON CONNECT
 // ------------------------------------------------------
 socket.on("connect", () => {
     socket.emit("requestUserList");
@@ -160,7 +206,7 @@ socket.on("connect", () => {
 });
 
 // ------------------------------------------------------
-// RESTORE OLD USER LIST LOGIC (Admin-safe)
+// USER LIST
 // ------------------------------------------------------
 socket.on("updateUserList", (users) => {
     userList.innerHTML = "";
@@ -176,29 +222,29 @@ socket.on("updateUserList", (users) => {
     }
 
     users.forEach((name) => {
-        // Create Item Container
-        const item = document.createElement("div"); // Changed from li to div for better styling flexibility
+        // ... (Existing item creation code) ...
+        const item = document.createElement("div");
         item.classList.add("user-item");
 
-        // Avatar
+        // CLICK TO PM
+        if (name !== username) {
+            item.addEventListener("click", () => setRecipient(name));
+        }
+
         const avatar = document.createElement("div");
         avatar.classList.add("user-avatar");
         avatar.textContent = name.charAt(0).toUpperCase();
-        // Give Admin a different avatar color if you want, or handle in CSS
         if (name === "Admin") {
             avatar.style.background = "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)";
         }
 
-        // Info Container
         const info = document.createElement("div");
         info.classList.add("user-info");
 
-        // Name
         const nameEl = document.createElement("div");
         nameEl.classList.add("user-name");
         nameEl.textContent = name === username ? `${name} (You)` : name;
 
-        // Badge (optional)
         const badge = document.createElement("span");
         if (name === "Admin") {
             badge.textContent = "Admin";
@@ -209,11 +255,9 @@ socket.on("updateUserList", (users) => {
 
         info.appendChild(nameEl);
 
-        // Online Indicator
         const indicator = document.createElement("div");
         indicator.classList.add("online-indicator");
 
-        // Assemble
         item.appendChild(avatar);
         item.appendChild(info);
         item.appendChild(indicator);
@@ -223,7 +267,7 @@ socket.on("updateUserList", (users) => {
 });
 
 // ------------------------------------------------------
-// CHAT HISTORY (Original logic)
+// CHAT HISTORY
 // ------------------------------------------------------
 socket.on("chatHistory", (history) => {
     messages.innerHTML = "";
@@ -234,10 +278,7 @@ socket.on("chatHistory", (history) => {
 });
 
 // ------------------------------------------------------
-// KICKED EVENT
-// ------------------------------------------------------
-// ------------------------------------------------------
-// KICKED / BANNED EVENTS
+// KICKED / BANNED
 // ------------------------------------------------------
 socket.on("kicked", () => {
     localStorage.clear();
@@ -256,8 +297,12 @@ socket.on("message", (data) => {
     renderMessage(data);
 });
 
+socket.on("private_message", (data) => {
+    renderMessage(data, true);
+});
+
 // ------------------------------------------------------
-// SEND MESSAGE + ENTER KEY (Original behavior)
+// SEND MESSAGE
 // ------------------------------------------------------
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -272,14 +317,20 @@ messageForm.addEventListener("submit", (e) => {
     const message = messageInput.value.trim();
     if (!message) return;
 
-    socket.emit("message", {
-        username,
-        message,
-        timestamp: new Date().toISOString(),
-    });
+    if (currentRecipient) {
+        socket.emit("private_message", {
+            to: currentRecipient,
+            message: message
+        });
+    } else {
+        socket.emit("message", {
+            username,
+            message,
+            timestamp: new Date().toISOString(),
+        });
+    }
 
     messageInput.value = "";
     messageInput.style.height = "auto";
-
     scrollToBottom(true);
 });
