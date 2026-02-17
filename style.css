@@ -551,4 +551,27 @@ aside.show {
         background: #1a1c2c;
         border-right: 1px solid var(--glass-border);
     }
+
+    #messageForm {
+        padding: 12px 16px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        gap: 10px;
+    }
+
+    #messageInput {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    #sendButton {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        /* Prevent shrinking */
+    }
+
+    .input-button {
+        padding: 8px;
+        font-size: 20px;
+    }
 }
