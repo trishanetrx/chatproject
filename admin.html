@@ -6,103 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        body {
-            background: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
-            min-height: 100vh;
-            color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Glassmorphism */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Tabs */
-        .tab-active {
-            background: linear-gradient(135deg, #FF6F91 0%, #FF9671 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 111, 145, 0.3);
-            border: none;
-        }
-
-        /* Status Dots */
-        .dot-online {
-            width: 10px;
-            height: 10px;
-            background: #00fa9a;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px #00fa9a;
-            animation: pulse 2s infinite;
-        }
-
-        .dot-offline {
-            width: 10px;
-            height: 10px;
-            background: #e53e3e;
-            border-radius: 50%;
-            display: inline-block;
-            opacity: 0.5;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        .card-hover:hover {
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 </head>
 
 <body>
     <!-- Top Navigation -->
     <div class="glass-effect border-b border-white/10 p-4 shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div
-                    class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                        </path>
-                    </svg>
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h1 class="text-white text-xl md:text-2xl font-bold tracking-tight">Admin Dashboard</h1>
                 </div>
-                <h1 class="text-white text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+                <!-- Mobile only logout could go here but let's keep it simple -->
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
                 <button onclick="refreshAll()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                    class="flex-1 md:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -111,7 +39,7 @@
                     <span>Refresh</span>
                 </button>
                 <button onclick="logout()"
-                    class="bg-red-500/80 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                    class="flex-1 md:flex-none justify-center bg-red-500/80 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     Logout
                 </button>
             </div>
@@ -120,21 +48,21 @@
 
     <!-- Tabs -->
     <div class="max-w-7xl mx-auto mt-8 px-6">
-        <div class="glass-effect rounded-xl shadow-xl p-2 flex space-x-2 bg-black/20">
+        <div class="glass-effect rounded-xl shadow-xl p-2 grid grid-cols-2 md:grid-cols-4 gap-2 bg-black/20">
             <button id="tabUsers"
-                class="tab-active flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white">
+                class="tab-active flex-1 px-3 md:px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white text-sm md:text-base">
                 Users
             </button>
             <button id="tabMessages"
-                class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
+                class="flex-1 px-3 md:px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200 text-sm md:text-base">
                 Messages
             </button>
             <button id="tabBans"
-                class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
+                class="flex-1 px-3 md:px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200 text-sm md:text-base">
                 Banned Users
             </button>
             <button id="tabControls"
-                class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
+                class="flex-1 px-3 md:px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200 text-sm md:text-base">
                 ⚡ Controls
             </button>
         </div>
