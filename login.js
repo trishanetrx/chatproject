@@ -21,6 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------
+    // CHECK FOR KICK/BAN REASON
+    // -------------------------
+    const urlParams = new URLSearchParams(window.location.search);
+    const reason = urlParams.get('reason');
+
+    if (reason === 'kicked') {
+        showNotification('You have been kicked by an admin.', 'error');
+        // Clean URL
+        window.history.replaceState({}, document.title, "login.html");
+    } else if (reason === 'banned') {
+        showNotification('You have been BANNED by an admin.', 'error');
+        // Clean URL
+        window.history.replaceState({}, document.title, "login.html");
+    }
+
+    // -------------------------
     // LOGIN FORM SUBMIT
     // -------------------------
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -28,6 +44,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+
+
+
+        // -------------------------
+        // NORMAL USER LOGIN
+        // -------------------------
+        try {
+            const response = await fetch(`${apiUrl}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Login success
+                showNotification('Login successful! Redirecting...', 'success');
+
+                // Save login session
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('isAdmin', data.isAdmin ? "true" : "false");
+
+                setTimeout(() => {
+                    window.location.href = 'chat.html';
+                }, 1200);
+
+            } else {
+                showNotification(data.message || 'Login failed. Please try again.', 'error');
+            }
+
+        } catch (error) {
+            console.error('Login error:', error);
+            showNotification('Server error. Try again later.', 'error');
+        }
 
 
 

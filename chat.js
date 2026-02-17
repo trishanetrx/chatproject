@@ -206,15 +206,13 @@ socket.on("chatHistory", (history) => {
 // KICKED / BANNED EVENTS
 // ------------------------------------------------------
 socket.on("kicked", () => {
-    alert("You have been kicked by an admin.");
     localStorage.clear();
-    window.location.href = "login.html";
+    window.location.href = "login.html?reason=kicked";
 });
 
 socket.on("banned", () => {
-    alert("You have been BANNED by an admin.");
     localStorage.clear();
-    window.location.href = "login.html";
+    window.location.href = "login.html?reason=banned";
 });
 
 // ------------------------------------------------------
