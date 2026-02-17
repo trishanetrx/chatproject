@@ -528,6 +528,13 @@ aside.show {
     color: #ffffff;
 }
 
+/* =========================================
+   BROADCAST OVERLAY
+   ========================================= */
+#broadcastOverlay {
+    z-index: 10000 !important;
+}
+
 /* Mobile */
 @media (max-width: 900px) {
     aside {
