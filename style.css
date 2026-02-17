@@ -276,6 +276,7 @@ aside.show {
     flex-direction: column;
     background: transparent;
     position: relative;
+    overflow: hidden;
 }
 
 #messages {
@@ -285,8 +286,9 @@ aside.show {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-bottom: 140px;
+    padding-bottom: 24px;
     scroll-behavior: smooth;
+    min-height: 0;
 }
 
 /* =========================================
@@ -360,8 +362,8 @@ aside.show {
     gap: 16px;
     align-items: center;
     backdrop-filter: blur(20px);
-    position: sticky;
-    bottom: 0;
+    position: relative;
+    z-index: 40;
 }
 
 #messageInput {
