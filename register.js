@@ -1,5 +1,23 @@
 const apiUrl = 'https://chatapi.copythingz.shop/api'; // Backend base URL
 
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
+
+    if (toggleButton && passwordInput && passwordIcon) {
+        toggleButton.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    }
+});
+
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -48,9 +66,8 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 function showNotification(message, type) {
     const notification = document.createElement('div');
     notification.textContent = message;
-    notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
+    notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
 
     document.body.appendChild(notification);
 
