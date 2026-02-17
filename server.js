@@ -75,7 +75,7 @@ if (!adminUser) {
     const salt = bcrypt.genSaltSync(10);
     const hashedAdminPass = bcrypt.hashSync(ADMIN_PASSWORD, salt);
     db.prepare(`INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1)`)
-      .run(ADMIN_USERNAME, hashedAdminPass);
+        .run(ADMIN_USERNAME, hashedAdminPass);
     console.log("Admin user created.");
 } else {
     // Optional: Update admin password if it matches the plain text one (migration)
@@ -103,14 +103,22 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            cb(null, true);
-        } else {
-            cb(null, true); // Strict CORS can be tricky during dev, relaxing slightly or keep strict
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return cb(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return cb(new Error(msg), false);
         }
+        return cb(null, true);
     },
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(bodyParser.json());
 
@@ -186,8 +194,8 @@ app.post('/api/register', (req, res) => {
         const hashed = bcrypt.hashSync(password, salt);
 
         db.prepare(`INSERT INTO users (username, password) VALUES (?, ?)`)
-          .run(username, hashed);
-        
+            .run(username, hashed);
+
         res.json({ message: "User registered" });
     } catch (err) {
         if (err.message.includes("UNIQUE")) {
@@ -273,7 +281,7 @@ app.delete('/api/admin/messages/delete-all', verifyAdminJWT, (req, res) => {
     try {
         const result = db.prepare(`DELETE FROM messages`).run();
         console.log(`Deleted ${result.changes} messages`);
-        res.json({ 
+        res.json({
             message: "All messages deleted successfully",
             deletedCount: result.changes
         });
@@ -298,8 +306,8 @@ app.get('/api/admin/bans', verifyAdminJWT, (req, res) => {
 app.post('/api/admin/ban', verifyAdminJWT, (req, res) => {
     const { username } = req.body;
     db.prepare(`INSERT OR IGNORE INTO bans(username) VALUES(?)`)
-      .run(username);
-    
+        .run(username);
+
     // Also kick
     const socket = onlineUsers.get(username);
     if (socket) {
@@ -307,14 +315,14 @@ app.post('/api/admin/ban', verifyAdminJWT, (req, res) => {
         onlineUsers.delete(username);
         db.prepare(`UPDATE users SET is_online=0 WHERE username=?`).run(username);
     }
-    
+
     res.json({ message: "User banned" });
 });
 
 // UNBAN USER
 app.post('/api/admin/unban', verifyAdminJWT, (req, res) => {
     db.prepare(`DELETE FROM bans WHERE username=?`)
-      .run(req.body.username);
+        .run(req.body.username);
     res.json({ message: "User unbanned" });
 });
 
@@ -333,7 +341,14 @@ app.post('/api/admin/kick', verifyAdminJWT, (req, res) => {
     const socket = onlineUsers.get(username);
 
     if (socket) {
-        socket.disconnect(true);
+        // Emit 'kicked' event so client can log out
+        socket.emit("kicked");
+
+        // Give it a moment to receive the event before cutting connection
+        setTimeout(() => {
+            socket.disconnect(true);
+        }, 100);
+
         onlineUsers.delete(username);
         db.prepare(`UPDATE users SET is_online=0 WHERE username=?`).run(username);
     }
@@ -385,7 +400,7 @@ io.on('connection', (socket) => {
 
     socket.on("message", (data) => {
         if (!data.username || !data.message) return;
-        
+
         // Rate limit simple check (optional, better in middleware but socket is different)
         // ...
 

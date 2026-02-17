@@ -200,6 +200,15 @@ socket.on("chatHistory", (history) => {
 });
 
 // ------------------------------------------------------
+// KICKED EVENT
+// ------------------------------------------------------
+socket.on("kicked", () => {
+    alert("You have been kicked by an admin.");
+    localStorage.clear();
+    window.location.href = "login.html";
+});
+
+// ------------------------------------------------------
 // NEW MESSAGE
 // ------------------------------------------------------
 socket.on("message", (data) => {
