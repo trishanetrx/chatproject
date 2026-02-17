@@ -239,9 +239,11 @@ header {
 
 main {
     flex: 1;
-    height: calc((var(--vh) * 100) - 70px);
+    /* height: calc((var(--vh) * 100) - 70px); Remove fixed calc */
     display: flex;
     overflow: hidden;
+    position: relative;
+    width: 100%;
 }
 
 aside {
