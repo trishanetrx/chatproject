@@ -166,25 +166,59 @@ socket.on("updateUserList", (users) => {
     userList.innerHTML = "";
 
     if (!Array.isArray(users) || users.length === 0) {
-        const noUsers = document.createElement("li");
+        const noUsers = document.createElement("div");
+        noUsers.style.padding = "20px";
+        noUsers.style.color = "var(--text-secondary)";
+        noUsers.style.textAlign = "center";
         noUsers.textContent = "No users online";
         userList.appendChild(noUsers);
         return;
     }
 
     users.forEach((name) => {
-        const li = document.createElement("li");
+        // Create Item Container
+        const item = document.createElement("div"); // Changed from li to div for better styling flexibility
+        item.classList.add("user-item");
 
-        let label = name;
-        if (name === username) label = `${name} (You)`;
+        // Avatar
+        const avatar = document.createElement("div");
+        avatar.classList.add("user-avatar");
+        avatar.textContent = name.charAt(0).toUpperCase();
+        // Give Admin a different avatar color if you want, or handle in CSS
         if (name === "Admin") {
-            label = "🛡️ Admin";
-            li.style.fontWeight = "bold";
-            li.style.color = "#f97316";
+            avatar.style.background = "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)";
         }
 
-        li.textContent = label;
-        userList.appendChild(li);
+        // Info Container
+        const info = document.createElement("div");
+        info.classList.add("user-info");
+
+        // Name
+        const nameEl = document.createElement("div");
+        nameEl.classList.add("user-name");
+        nameEl.textContent = name === username ? `${name} (You)` : name;
+
+        // Badge (optional)
+        const badge = document.createElement("span");
+        if (name === "Admin") {
+            badge.textContent = "Admin";
+            badge.classList.add("user-badge");
+            badge.style.marginLeft = "6px";
+            nameEl.appendChild(badge);
+        }
+
+        info.appendChild(nameEl);
+
+        // Online Indicator
+        const indicator = document.createElement("div");
+        indicator.classList.add("online-indicator");
+
+        // Assemble
+        item.appendChild(avatar);
+        item.appendChild(info);
+        item.appendChild(indicator);
+
+        userList.appendChild(item);
     });
 });
 
