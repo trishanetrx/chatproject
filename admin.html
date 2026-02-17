@@ -1,71 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
             min-height: 100vh;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
         }
+
+        /* Glassmorphism */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Tabs */
         .tab-active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF6F91 0%, #FF9671 100%);
             color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(255, 111, 145, 0.3);
+            border: none;
         }
+
+        /* Status Dots */
         .dot-online {
             width: 10px;
             height: 10px;
-            background: #10b981;
+            background: #00fa9a;
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 8px #10b981;
+            box-shadow: 0 0 10px #00fa9a;
             animation: pulse 2s infinite;
         }
+
         .dot-offline {
             width: 10px;
             height: 10px;
-            background: #ef4444;
+            background: #e53e3e;
             border-radius: 50%;
             display: inline-block;
+            opacity: 0.5;
         }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+
         .card-hover:hover {
             transform: translateY(-2px);
             transition: all 0.3s ease;
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
     </style>
 </head>
+
 <body>
     <!-- Top Navigation -->
-    <div class="bg-white/10 backdrop-blur-lg border-b border-white/20 p-4 shadow-lg">
+    <div class="glass-effect border-b border-white/10 p-4 shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
                     </svg>
                 </div>
                 <h1 class="text-white text-2xl font-bold tracking-tight">Admin Dashboard</h1>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="refreshAll()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                <button onclick="refreshAll()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
                     </svg>
                     <span>Refresh</span>
                 </button>
-                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                <button onclick="logout()"
+                    class="bg-red-500/80 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                     Logout
                 </button>
             </div>
@@ -73,15 +119,18 @@
     </div>
 
     <!-- Tabs -->
-    <div class="max-w-7xl mx-auto mt-6 px-4">
-        <div class="glass-effect rounded-xl shadow-xl p-2 flex space-x-2">
-            <button id="tabUsers" class="tab-active flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200">
+    <div class="max-w-7xl mx-auto mt-8 px-6">
+        <div class="glass-effect rounded-xl shadow-xl p-2 flex space-x-2 bg-black/20">
+            <button id="tabUsers"
+                class="tab-active flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200 text-white">
                 Users
             </button>
-            <button id="tabMessages" class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+            <button id="tabMessages"
+                class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
                 Messages
             </button>
-            <button id="tabBans" class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200">
+            <button id="tabBans"
+                class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
                 Banned Users
             </button>
         </div>
@@ -90,20 +139,20 @@
     <!-- USERS SECTION -->
     <div id="sectionUsers" class="max-w-7xl mx-auto p-6">
         <div class="glass-effect rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
+            <div class="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 backdrop-blur">
                 <h2 class="text-2xl font-bold text-white">Users Management</h2>
                 <p class="text-purple-100 mt-1">Monitor and manage all active users</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Username</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                        <tr class="bg-white/5 border-b border-white/10">
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Status</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Username</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="usersTable" class="divide-y divide-gray-100"></tbody>
+                    <tbody id="usersTable" class="divide-y divide-white/5"></tbody>
                 </table>
             </div>
         </div>
@@ -112,14 +161,18 @@
     <!-- MESSAGES SECTION -->
     <div id="sectionMessages" class="max-w-7xl mx-auto p-6 hidden">
         <div class="glass-effect rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 flex justify-between items-center">
+            <div
+                class="bg-gradient-to-r from-blue-600/80 to-cyan-600/80 p-6 flex justify-between items-center backdrop-blur">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Messages Overview</h2>
                     <p class="text-blue-100 mt-1">Review all messages from users</p>
                 </div>
-                <button onclick="deleteAllMessages()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
+                <button onclick="deleteAllMessages()"
+                    class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
                     </svg>
                     <span>Delete All</span>
                 </button>
@@ -127,15 +180,15 @@
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">ID</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">User</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Message</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Timestamp</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                        <tr class="bg-white/5 border-b border-white/10">
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">ID</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">User</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Message</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Timestamp</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="messagesTable" class="divide-y divide-gray-100"></tbody>
+                    <tbody id="messagesTable" class="divide-y divide-white/5"></tbody>
                 </table>
             </div>
         </div>
@@ -144,19 +197,19 @@
     <!-- BANS SECTION -->
     <div id="sectionBans" class="max-w-7xl mx-auto p-6 hidden">
         <div class="glass-effect rounded-xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-red-600 to-orange-600 p-6">
+            <div class="bg-gradient-to-r from-red-600/80 to-orange-600/80 p-6 backdrop-blur">
                 <h2 class="text-2xl font-bold text-white">Banned Users</h2>
                 <p class="text-red-100 mt-1">Manage restricted user accounts</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Username</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                        <tr class="bg-white/5 border-b border-white/10">
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Username</th>
+                            <th class="p-4 text-left text-sm font-semibold text-gray-300">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="bansTable" class="divide-y divide-gray-100"></tbody>
+                    <tbody id="bansTable" class="divide-y divide-white/5"></tbody>
                 </table>
             </div>
         </div>
@@ -241,7 +294,7 @@
         // ================================
         async function loadUsers() {
             const usersTable = document.getElementById("usersTable");
-            usersTable.innerHTML = "<tr><td colspan='3' class='p-4 text-center'>Loading...</td></tr>";
+            usersTable.innerHTML = "<tr><td colspan='3' class='p-4 text-center text-gray-400'>Loading...</td></tr>";
 
             const users = await api("/admin/all-users");
 
@@ -249,7 +302,7 @@
 
             users.forEach(user => {
                 const tr = document.createElement("tr");
-                tr.className = "hover:bg-gray-50";
+                tr.className = "hover:bg-white/5 transition-colors";
 
                 const isOnline = user.is_online === 1;
 
@@ -257,20 +310,20 @@
                     <td class="p-4">
                         <span class="${isOnline ? "dot-online" : "dot-offline"}"></span>
                     </td>
-                    <td class="p-4 font-medium">${user.username}</td>
+                    <td class="p-4 font-medium text-white">${user.username}</td>
                     <td class="p-4 space-x-2">
                         <button onclick="kickUser('${user.username}')" 
-                            class="px-3 py-1 bg-yellow-500 text-white rounded shadow hover:bg-yellow-600">
+                            class="px-3 py-1 bg-yellow-500/80 text-white rounded shadow hover:bg-yellow-600 transition-colors">
                             Kick
                         </button>
 
                         <button onclick="banUser('${user.username}')" 
-                            class="px-3 py-1 bg-red-500 text-white rounded shadow hover:bg-red-600">
+                            class="px-3 py-1 bg-red-500/80 text-white rounded shadow hover:bg-red-600 transition-colors">
                             Ban
                         </button>
 
                         <button onclick="deleteUser(${user.id})" 
-                            class="px-3 py-1 bg-gray-700 text-white rounded shadow hover:bg-gray-900">
+                            class="px-3 py-1 bg-gray-700/80 text-white rounded shadow hover:bg-gray-600 transition-colors">
                             Delete
                         </button>
                     </td>
@@ -322,7 +375,7 @@
         async function loadBans() {
             const bansTable = document.getElementById("bansTable");
 
-            bansTable.innerHTML = "<tr><td colspan='2' class='p-4 text-center'>Loading...</td></tr>";
+            bansTable.innerHTML = "<tr><td colspan='2' class='p-4 text-center text-gray-400'>Loading...</td></tr>";
 
             const bans = await api("/admin/bans");
 
@@ -330,13 +383,13 @@
 
             bans.forEach(row => {
                 const tr = document.createElement("tr");
-                tr.className = "hover:bg-gray-50";
+                tr.className = "hover:bg-white/5 transition-colors";
 
                 tr.innerHTML = `
-                    <td class="p-4 font-medium">${row.username}</td>
+                    <td class="p-4 font-medium text-white">${row.username}</td>
                     <td class="p-4">
                         <button onclick="unbanUser('${row.username}')" 
-                            class="px-3 py-1 bg-green-500 text-white rounded shadow hover:bg-green-600">
+                            class="px-3 py-1 bg-green-500/80 text-white rounded shadow hover:bg-green-600 transition-colors">
                             Unban
                         </button>
                     </td>
@@ -351,7 +404,7 @@
         // ================================
         async function loadMessages() {
             const messagesTable = document.getElementById("messagesTable");
-            messagesTable.innerHTML = "<tr><td colspan='5' class='p-4 text-center'>Loading...</td></tr>";
+            messagesTable.innerHTML = "<tr><td colspan='5' class='p-4 text-center text-gray-400'>Loading...</td></tr>";
 
             const messages = await api("/admin/messages");
 
@@ -359,15 +412,16 @@
 
             messages.forEach(m => {
                 const tr = document.createElement("tr");
+                tr.className = "hover:bg-white/5 transition-colors";
 
                 tr.innerHTML = `
-                    <td class="p-4">${m.id}</td>
-                    <td class="p-4">${m.username}</td>
-                    <td class="p-4">${m.message}</td>
-                    <td class="p-4">${m.timestamp}</td>
+                    <td class="p-4 text-gray-400 text-sm">${m.id}</td>
+                    <td class="p-4 font-medium text-white">${m.username}</td>
+                    <td class="p-4 text-gray-300 break-all">${m.message}</td>
+                    <td class="p-4 text-xs text-gray-500">${m.timestamp}</td>
                     <td class="p-4">
                         <button onclick="deleteMessage(${m.id})"
-                            class="px-3 py-1 bg-red-500 text-white rounded shadow hover:bg-red-600">
+                            class="px-3 py-1 bg-red-500/80 text-white rounded shadow hover:bg-red-600 transition-colors">
                             Delete
                         </button>
                     </td>
@@ -392,7 +446,7 @@
         // ================================
         async function deleteAllMessages() {
             if (!confirm("⚠️ WARNING: Delete ALL messages? This cannot be undone!")) return;
-            
+
             // Double confirmation for safety
             if (!confirm("Are you absolutely sure? This will permanently delete ALL messages!")) return;
 
@@ -425,4 +479,5 @@
         // AUTO-REFRESH REMOVED - Now only refreshes when you click the button or perform an action
     </script>
 </body>
+
 </html>

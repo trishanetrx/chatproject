@@ -388,13 +388,21 @@
         #closeReply {
             background: none;
             border: none;
-            color: #aaa;
+            color: #a0aec0;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 28px;
+            /* Larger for touch */
+            padding: 0 12px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
         }
 
-        #closeReply:hover {
-            color: white;
+        #closeReply:hover,
+        #closeReply:active {
+            color: #ffffff;
         }
 
         /* MOBILE */
