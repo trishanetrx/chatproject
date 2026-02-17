@@ -311,7 +311,13 @@ app.post('/api/admin/ban', verifyAdminJWT, (req, res) => {
     // Also kick
     const socket = onlineUsers.get(username);
     if (socket) {
-        socket.disconnect(true);
+        socket.emit("banned");
+
+        // Give it a moment to receive the event before cutting connection
+        setTimeout(() => {
+            socket.disconnect(true);
+        }, 1500);
+
         onlineUsers.delete(username);
         db.prepare(`UPDATE users SET is_online=0 WHERE username=?`).run(username);
     }
@@ -347,7 +353,7 @@ app.post('/api/admin/kick', verifyAdminJWT, (req, res) => {
         // Give it a moment to receive the event before cutting connection
         setTimeout(() => {
             socket.disconnect(true);
-        }, 100);
+        }, 1500);
 
         onlineUsers.delete(username);
         db.prepare(`UPDATE users SET is_online=0 WHERE username=?`).run(username);
