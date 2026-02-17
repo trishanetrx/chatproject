@@ -363,6 +363,33 @@ app.post('/api/admin/kick', verifyAdminJWT, (req, res) => {
 });
 
 // -----------------------------------------
+// ADMIN POWER FEATURES
+// -----------------------------------------
+let slowMode = 0; // seconds
+const lastMessageTimes = new Map();
+
+app.post('/api/admin/broadcast', verifyAdminJWT, (req, res) => {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ message: "Message required" });
+
+    // Emit to all connected clients
+    io.emit("system_broadcast", {
+        message,
+        timestamp: new Date().toISOString()
+    });
+    res.json({ message: "Broadcast sent" });
+});
+
+app.post('/api/admin/slow-mode', verifyAdminJWT, (req, res) => {
+    const { duration } = req.body;
+    slowMode = parseInt(duration) || 0;
+
+    // Notify clients to update UI
+    io.emit("slow_mode_updated", { enabled: slowMode > 0, duration: slowMode });
+    res.json({ message: `Slow mode set to ${slowMode}s` });
+});
+
+// -----------------------------------------
 // SOCKET.IO LOGIC
 // -----------------------------------------
 function loadHistory() {
@@ -407,8 +434,21 @@ io.on('connection', (socket) => {
     socket.on("message", (data) => {
         if (!data.username || !data.message) return;
 
-        // Rate limit simple check (optional, better in middleware but socket is different)
-        // ...
+        // Slow Mode Check (Skip for Admin)
+        if (slowMode > 0 && data.username !== "Admin") {
+            const lastTime = lastMessageTimes.get(data.username) || 0;
+            const now = Date.now();
+            if (now - lastTime < slowMode * 1000) {
+                // Send specific error event or reuse private_message as system warning
+                socket.emit("private_message", {
+                    from: "System",
+                    message: `Slow mode is active. Please wait ${slowMode} seconds between messages.`,
+                    timestamp: new Date().toISOString()
+                });
+                return;
+            }
+            lastMessageTimes.set(data.username, now);
+        }
 
         saveMessage(data.username, data.message, data.timestamp);
         io.emit("message", data);

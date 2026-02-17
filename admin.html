@@ -133,6 +133,10 @@
                 class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
                 Banned Users
             </button>
+            <button id="tabControls"
+                class="flex-1 px-6 py-3 rounded-lg font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-all duration-200">
+                ⚡ Controls
+            </button>
         </div>
     </div>
 
@@ -215,6 +219,68 @@
         </div>
     </div>
 
+    <!-- CONTROLS SECTION -->
+    <div id="sectionControls" class="max-w-7xl mx-auto p-6 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Broadcast -->
+            <div class="glass-effect rounded-xl shadow-2xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center text-red-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">System Broadcast</h2>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Send a high-priority alert to all connected users.</p>
+                <div class="space-y-4">
+                    <textarea id="broadcastInput" rows="3"
+                        class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors"
+                        placeholder="e.g. Server maintenance in 10 minutes..."></textarea>
+                    <button onclick="sendBroadcast()"
+                        class="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white py-2.5 rounded-lg font-medium shadow-lg hover:shadow-red-500/30 transition-all active:scale-95">
+                        Send Broadcast
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slow Mode -->
+            <div class="glass-effect rounded-xl shadow-2xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center text-orange-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Slow Mode</h2>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Restrict how often users can send messages.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Duration
+                            (Seconds)</label>
+                        <select id="slowModeSelect"
+                            class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-orange-500 transition-colors">
+                            <option value="0">Off (No Limit)</option>
+                            <option value="3">3 Seconds</option>
+                            <option value="5">5 Seconds</option>
+                            <option value="10">10 Seconds</option>
+                            <option value="30">30 Seconds</option>
+                            <option value="60">1 Minute</option>
+                        </select>
+                    </div>
+                    <button onclick="setSlowMode()"
+                        class="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-2.5 rounded-lg font-medium shadow-lg hover:shadow-orange-500/30 transition-all active:scale-95">
+                        Update Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = "https://chatapi.copythingz.shop/api";
 
@@ -240,19 +306,23 @@
         const tabUsers = document.getElementById("tabUsers");
         const tabMessages = document.getElementById("tabMessages");
         const tabBans = document.getElementById("tabBans");
+        const tabControls = document.getElementById("tabControls");
 
         const sectionUsers = document.getElementById("sectionUsers");
         const sectionMessages = document.getElementById("sectionMessages");
         const sectionBans = document.getElementById("sectionBans");
+        const sectionControls = document.getElementById("sectionControls");
 
         function switchTab(tab) {
             tabUsers.classList.remove("tab-active");
             tabMessages.classList.remove("tab-active");
             tabBans.classList.remove("tab-active");
+            tabControls.classList.remove("tab-active");
 
             sectionUsers.classList.add("hidden");
             sectionMessages.classList.add("hidden");
             sectionBans.classList.add("hidden");
+            sectionControls.classList.add("hidden");
 
             if (tab === "users") {
                 tabUsers.classList.add("tab-active");
@@ -266,11 +336,16 @@
                 tabBans.classList.add("tab-active");
                 sectionBans.classList.remove("hidden");
             }
+            if (tab === "controls") {
+                tabControls.classList.add("tab-active");
+                sectionControls.classList.remove("hidden");
+            }
         }
 
         tabUsers.addEventListener("click", () => switchTab("users"));
         tabMessages.addEventListener("click", () => switchTab("messages"));
         tabBans.addEventListener("click", () => switchTab("bans"));
+        tabControls.addEventListener("click", () => switchTab("controls"));
 
         // ================================
         //  API WRAPPER
@@ -477,6 +552,40 @@
         loadMessages();
 
         // AUTO-REFRESH REMOVED - Now only refreshes when you click the button or perform an action
+
+        // ================================
+        //  CONTROLS: BROADCAST
+        // ================================
+        async function sendBroadcast() {
+            const input = document.getElementById("broadcastInput");
+            const message = input.value.trim();
+            if (!message) return alert("Please enter a message!");
+
+            if (!confirm("📢 Send this broadcast to ALL users?")) return;
+
+            try {
+                await api("/admin/broadcast", "POST", { message });
+                alert("Broadcast sent successfully!");
+                input.value = "";
+            } catch (err) {
+                alert("Failed to send broadcast.");
+            }
+        }
+
+        // ================================
+        //  CONTROLS: SLOW MODE
+        // ================================
+        async function setSlowMode() {
+            const select = document.getElementById("slowModeSelect");
+            const duration = parseInt(select.value);
+
+            try {
+                const res = await api("/admin/slow-mode", "POST", { duration });
+                alert(res.message);
+            } catch (err) {
+                alert("Failed to update slow mode.");
+            }
+        }
     </script>
 </body>
 

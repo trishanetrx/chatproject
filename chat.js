@@ -19,6 +19,8 @@ const username = localStorage.getItem("username");
 if (!username) window.location.href = "login.html";
 
 let currentRecipient = null;
+let slowModeDuration = 0;
+let lastMessageTime = 0;
 
 // ------------------------------------------------------
 // ANDROID SAFE HEIGHT FIX
@@ -317,6 +319,22 @@ messageForm.addEventListener("submit", (e) => {
     const message = messageInput.value.trim();
     if (!message) return;
 
+    // SLOW MODE CHECK
+    if (slowModeDuration > 0 && !currentRecipient) {
+        const now = Date.now();
+        const diff = now - lastMessageTime;
+        const requiredDelay = slowModeDuration * 1000;
+
+        if (diff < requiredDelay) {
+            const remaining = Math.ceil((requiredDelay - diff) / 1000);
+            // Use a custom alert or reuse broadcast overlay? System message is better but alert is quick.
+            // Since we have verifyAdminJWT on server, this is just client UX.
+            alert(`⏳ Slow mode is active. Please wait ${remaining}s.`);
+            return;
+        }
+        lastMessageTime = now;
+    }
+
     if (currentRecipient) {
         socket.emit("private_message", {
             to: currentRecipient,
@@ -334,3 +352,44 @@ messageForm.addEventListener("submit", (e) => {
     messageInput.style.height = "auto";
     scrollToBottom(true);
 });
+
+// ==========================================
+// BROADCAST & SLOW MODE HANDLERS
+// ==========================================
+const broadcastOverlay = document.getElementById("broadcastOverlay");
+const broadcastMessage = document.getElementById("broadcastMessage");
+const slowModeIndicator = document.getElementById("slowModeIndicator");
+const slowModeTime = document.getElementById("slowModeTime");
+
+socket.on("system_broadcast", (data) => {
+    if (!broadcastMessage || !broadcastOverlay) return;
+    broadcastMessage.textContent = data.message;
+    broadcastOverlay.classList.remove("hidden");
+    requestAnimationFrame(() => {
+        broadcastOverlay.classList.remove("opacity-0");
+        broadcastOverlay.firstElementChild.classList.remove("scale-95");
+        broadcastOverlay.firstElementChild.classList.add("scale-100");
+    });
+});
+
+socket.on("slow_mode_updated", (data) => {
+    slowModeDuration = data.enabled ? data.duration : 0;
+    if (slowModeIndicator && slowModeTime) {
+        if (slowModeDuration > 0) {
+            slowModeTime.textContent = slowModeDuration;
+            slowModeIndicator.classList.remove("hidden");
+        } else {
+            slowModeIndicator.classList.add("hidden");
+        }
+    }
+});
+
+window.closeBroadcast = () => {
+    if (!broadcastOverlay) return;
+    broadcastOverlay.classList.add("opacity-0");
+    broadcastOverlay.firstElementChild.classList.remove("scale-100");
+    broadcastOverlay.firstElementChild.classList.add("scale-95");
+    setTimeout(() => {
+        broadcastOverlay.classList.add("hidden");
+    }, 300);
+};

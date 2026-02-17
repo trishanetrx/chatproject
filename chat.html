@@ -449,6 +449,12 @@
             <div id="messages"></div>
 
             <form id="messageForm">
+                <div id="slowModeIndicator"
+                    class="hidden absolute bottom-full right-6 mb-0 bg-orange-600/90 text-white px-3 py-1.5 rounded-t-lg text-xs font-bold backdrop-blur flex items-center gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.2)] z-0">
+                    <i class="fas fa-hourglass-half animate-pulse"></i>
+                    <span>Slow Mode: <span id="slowModeTime">10</span>s</span>
+                </div>
+
                 <div id="replyIndicator">
                     <div>Replying to <span id="replyName">User</span></div>
                     <button id="closeReply" type="button">&times;</button>
@@ -466,6 +472,21 @@
         </section>
 
     </main>
+
+    <!-- Broadcast Overlay -->
+    <div id="broadcastOverlay"
+        class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div
+            class="bg-gradient-to-br from-red-900/90 to-orange-900/90 border border-red-500/50 p-6 rounded-2xl max-w-md w-full shadow-2xl text-center transform scale-95 transition-transform duration-300">
+            <div class="text-5xl mb-4 animate-bounce">📢</div>
+            <h3 class="text-2xl font-bold text-white mb-2">System Announcement</h3>
+            <p id="broadcastMessage" class="text-white/90 text-lg leading-relaxed font-medium"></p>
+            <button onclick="closeBroadcast()"
+                class="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/10 font-semibold tracking-wide">
+                DISMISS
+            </button>
+        </div>
+    </div>
 
     <script src="chat.js"></script>
 
