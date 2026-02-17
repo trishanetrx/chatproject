@@ -362,7 +362,11 @@ const slowModeIndicator = document.getElementById("slowModeIndicator");
 const slowModeTime = document.getElementById("slowModeTime");
 
 socket.on("system_broadcast", (data) => {
-    if (!broadcastMessage || !broadcastOverlay) return;
+    console.log("[DEBUG] Broadcast received:", data);
+    if (!broadcastMessage || !broadcastOverlay) {
+        console.error("[DEBUG] Broadcast elements missing!");
+        return;
+    }
     broadcastMessage.textContent = data.message;
     broadcastOverlay.classList.remove("hidden");
     requestAnimationFrame(() => {
