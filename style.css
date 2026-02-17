@@ -354,6 +354,8 @@ aside.show {
     background: rgba(26, 28, 44, 0.9);
     border-top: 1px solid var(--glass-border);
     padding: 20px 24px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    /* Safe area fix */
     display: flex;
     gap: 16px;
     align-items: center;
