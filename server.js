@@ -370,6 +370,7 @@ const lastMessageTimes = new Map();
 
 app.post('/api/admin/broadcast', verifyAdminJWT, (req, res) => {
     const { message } = req.body;
+    console.log("[DEBUG] Broadcast Request:", message);
     if (!message) return res.status(400).json({ message: "Message required" });
 
     // Emit to all connected clients
@@ -377,11 +378,13 @@ app.post('/api/admin/broadcast', verifyAdminJWT, (req, res) => {
         message,
         timestamp: new Date().toISOString()
     });
+    console.log("[DEBUG] Emitted system_broadcast to all");
     res.json({ message: "Broadcast sent" });
 });
 
 app.post('/api/admin/slow-mode', verifyAdminJWT, (req, res) => {
     const { duration } = req.body;
+    console.log("[DEBUG] Slow Mode Request:", duration);
     slowMode = parseInt(duration) || 0;
 
     // Notify clients to update UI

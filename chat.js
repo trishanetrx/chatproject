@@ -397,3 +397,19 @@ window.closeBroadcast = () => {
         broadcastOverlay.classList.add("hidden");
     }, 300);
 };
+
+// DEBUG: Simulate Broadcast after 3 seconds to test UI
+setTimeout(() => {
+    console.log("[DEBUG] Simulating broadcast UI...");
+    if (broadcastMessage && broadcastOverlay) {
+        broadcastMessage.textContent = "🔍 DEBUG: If you see this, the Overlay UI is working!";
+        broadcastOverlay.classList.remove("hidden");
+        requestAnimationFrame(() => {
+            broadcastOverlay.classList.remove("opacity-0");
+            broadcastOverlay.firstElementChild.classList.remove("scale-95");
+            broadcastOverlay.firstElementChild.classList.add("scale-100");
+        });
+    } else {
+        console.error("[DEBUG] Overlay elements not found!");
+    }
+}, 3000);
