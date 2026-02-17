@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,9 +35,12 @@
 
         header h1 {
             font-family: 'Poppins', sans-serif;
-            font-size: 3rem; /* Larger font size */
-            font-weight: 700; /* Bold */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Subtle shadow */
+            font-size: 3rem;
+            /* Larger font size */
+            font-weight: 700;
+            /* Bold */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            /* Subtle shadow */
             margin: 0;
         }
 
@@ -57,7 +61,8 @@
             height: 90%;
             position: relative;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Frame shadow */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            /* Frame shadow */
         }
 
         /* Button Styling */
@@ -66,7 +71,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 15px 40px; /* Larger uniform size */
+            padding: 15px 40px;
+            /* Larger uniform size */
             font-size: 1.5rem;
             font-weight: 600;
             border: none;
@@ -74,9 +80,11 @@
             cursor: pointer;
             color: #fff;
             text-transform: uppercase;
-            background-color: rgba(0, 123, 255, 0.85); /* Default blue */
+            background-color: rgba(0, 123, 255, 0.85);
+            /* Default blue */
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8); /* Glow effect */
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
+            /* Glow effect */
         }
 
         /* Hover Effects with Dynamic Glow */
@@ -87,11 +95,24 @@
         }
 
         /* Button Specific Colors */
-        .image-frame:nth-child(1) button { background-color: #1E90FF; } /* Light blue for Login */
-        .image-frame:nth-child(2) button { background-color: #28A745; } /* Green for Register */
-        .image-frame:nth-child(3) button { background-color: #FF5733; } /* Orange for Chat Now */
+        .image-frame:nth-child(1) button {
+            background-color: #1E90FF;
+        }
+
+        /* Light blue for Login */
+        .image-frame:nth-child(2) button {
+            background-color: #28A745;
+        }
+
+        /* Green for Register */
+        .image-frame:nth-child(3) button {
+            background-color: #FF5733;
+        }
+
+        /* Orange for Chat Now */
     </style>
 </head>
+
 <body>
     <!-- Header Section -->
     <header>
@@ -101,13 +122,13 @@
     <!-- Main Content -->
     <main>
         <!-- Image Frames with Buttons -->
-        <div class="image-frame" style="background-image: url('image1.png');">
+        <div class="image-frame" style="background-image: url('image1.webp');">
             <button id="loginButton">Login</button>
         </div>
-        <div class="image-frame" style="background-image: url('image2.png');">
+        <div class="image-frame" style="background-image: url('image2.webp');">
             <button id="registerButton">Register</button>
         </div>
-        <div class="image-frame" style="background-image: url('image3.png');">
+        <div class="image-frame" style="background-image: url('image3.webp');">
             <button id="chatButton">Chat Now</button>
         </div>
     </main>
@@ -133,4 +154,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -1,0 +1,2 @@
+# Redirects for single page app behavior if needed, currently just ensuring 404s work
+/*  /index.html  200
