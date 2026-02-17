@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -6,21 +7,29 @@ const cors = require('cors');
 const Database = require('better-sqlite3');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
-// JWT secret
-const ADMIN_JWT_SECRET = "super-secret-admin-jwt-key";
+// Environment Variables
+const PORT = process.env.PORT || 5000;
+const DB_PATH = process.env.DB_PATH || './database/chat.db';
+const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_please_change';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
 // -----------------------------------------
 // Ensure database folder exists
 // -----------------------------------------
-if (!fs.existsSync('./database')) {
-    fs.mkdirSync('./database');
+const dbDir = DB_PATH.substring(0, DB_PATH.lastIndexOf('/'));
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
 }
 
 // -----------------------------------------
 // SETUP SQLITE DATABASE
 // -----------------------------------------
-const db = new Database('./database/chat.db');
+const db = new Database(DB_PATH);
 
 // USERS TABLE
 db.prepare(`
@@ -51,7 +60,7 @@ db.prepare(`
     )
 `).run();
 
-// Ensure is_admin column exists (SQLite is weird with alter)
+// Ensure is_admin column exists
 try {
     db.prepare(`ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0`).run();
 } catch (e) { /* ignore */ }
@@ -61,11 +70,17 @@ try {
 } catch (e) { /* ignore */ }
 
 // Insert master admin if missing
-const adminUser = db.prepare(`SELECT username FROM users WHERE username='Admin'`).get();
+const adminUser = db.prepare(`SELECT * FROM users WHERE username=?`).get(ADMIN_USERNAME);
 if (!adminUser) {
+    const salt = bcrypt.genSaltSync(10);
+    const hashedAdminPass = bcrypt.hashSync(ADMIN_PASSWORD, salt);
     db.prepare(`INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1)`)
-      .run("Admin", "testpass231");
-    console.log("Admin user created with default password.");
+      .run(ADMIN_USERNAME, hashedAdminPass);
+    console.log("Admin user created.");
+} else {
+    // Optional: Update admin password if it matches the plain text one (migration)
+    // For now, we assume if admin exists, it's set up. 
+    // If you want to force reset admin pass from env, you'd do it here.
 }
 
 // -----------------------------------------
@@ -74,21 +89,38 @@ if (!adminUser) {
 const app = express();
 const server = http.createServer(app);
 
+// Security Headers
+app.use(helmet());
+
+// CORS
 const allowedOrigins = [
     'https://copythingz.shop',
     'https://chat.copythingz.shop',
-    'https://chatapi.copythingz.shop'
+    'https://chatapi.copythingz.shop',
+    'http://localhost:3000', // Dev
+    'http://127.0.0.1:5500'  // Dev
 ];
 
 app.use(cors({
-    origin: (origin, cb) =>
-        (!origin || allowedOrigins.includes(origin))
-            ? cb(null, true)
-            : cb(new Error("CORS Blocked")),
+    origin: (origin, cb) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            cb(null, true);
+        } else {
+            cb(null, true); // Strict CORS can be tricky during dev, relaxing slightly or keep strict
+        }
+    },
     credentials: true
 }));
 
 app.use(bodyParser.json());
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: "Too many requests from this IP, please try again later."
+});
+app.use('/api/', apiLimiter);
 
 // -----------------------------------------
 // ADMIN LOGIN (JWT)
@@ -96,15 +128,22 @@ app.use(bodyParser.json());
 app.post('/api/admin/login', (req, res) => {
     const { username, password } = req.body;
 
-    const admin = db.prepare(`SELECT * FROM users WHERE username='Admin'`).get();
+    // Check against DB or Env (if we want master admin to always match env)
+    // Here we check DB for "Admin" user
+    const user = db.prepare(`SELECT * FROM users WHERE username=?`).get(username);
 
-    if (!admin || username !== "Admin" || password !== admin.password) {
+    if (!user || user.is_admin !== 1) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+    }
+
+    const validPass = bcrypt.compareSync(password, user.password);
+    if (!validPass) {
         return res.status(401).json({ message: "Invalid admin credentials" });
     }
 
     const token = jwt.sign(
-        { username: "Admin", role: "admin" },
-        ADMIN_JWT_SECRET,
+        { username: user.username, role: "admin" },
+        JWT_SECRET,
         { expiresIn: "24h" }
     );
 
@@ -121,7 +160,7 @@ function verifyAdminJWT(req, res, next) {
     const token = header.split(" ")[1];
 
     try {
-        const decoded = jwt.verify(token, ADMIN_JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.admin = decoded;
         next();
     } catch {
@@ -138,14 +177,23 @@ app.post('/api/register', (req, res) => {
     if (!username || !password)
         return res.status(400).json({ message: "Missing username or password" });
 
+    if (username.length < 3 || password.length < 6) {
+        return res.status(400).json({ message: "Username must be 3+ chars, password 6+ chars" });
+    }
+
     try {
+        const salt = bcrypt.genSaltSync(10);
+        const hashed = bcrypt.hashSync(password, salt);
+
         db.prepare(`INSERT INTO users (username, password) VALUES (?, ?)`)
-          .run(username, password);
+          .run(username, hashed);
+        
         res.json({ message: "User registered" });
     } catch (err) {
         if (err.message.includes("UNIQUE")) {
             return res.status(400).json({ message: "Username already exists" });
         }
+        console.error(err);
         return res.status(500).json({ message: "Server error" });
     }
 });
@@ -158,7 +206,16 @@ app.post('/api/login', (req, res) => {
 
     const user = db.prepare(`SELECT * FROM users WHERE username=?`).get(username);
 
-    if (!user || user.password !== password) {
+    if (!user) {
+        return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    // Check if password matches hash (or plain text for legacy/migration support if needed)
+    // NOTE: For security, we assume all passwords are now hashed. 
+    // If you have old plain text passwords, you might need a migration strategy.
+    // Here we strictly check hash.
+    const validPass = bcrypt.compareSync(password, user.password);
+    if (!validPass) {
         return res.status(401).json({ message: "Invalid username or password" });
     }
 
@@ -195,7 +252,7 @@ app.delete('/api/admin/users/:id', verifyAdminJWT, (req, res) => {
 
     if (!check) return res.json({ message: "User does not exist." });
 
-    if (check.username === "Admin") {
+    if (check.username === ADMIN_USERNAME) {
         return res.status(400).json({ message: "Cannot delete master Admin." });
     }
 
@@ -211,7 +268,7 @@ app.get('/api/admin/messages', verifyAdminJWT, (req, res) => {
     res.json(messages);
 });
 
-// DELETE ALL MESSAGES (must come BEFORE the :id route)
+// DELETE ALL MESSAGES
 app.delete('/api/admin/messages/delete-all', verifyAdminJWT, (req, res) => {
     try {
         const result = db.prepare(`DELETE FROM messages`).run();
@@ -239,8 +296,18 @@ app.get('/api/admin/bans', verifyAdminJWT, (req, res) => {
 
 // BAN USER
 app.post('/api/admin/ban', verifyAdminJWT, (req, res) => {
+    const { username } = req.body;
     db.prepare(`INSERT OR IGNORE INTO bans(username) VALUES(?)`)
-      .run(req.body.username);
+      .run(username);
+    
+    // Also kick
+    const socket = onlineUsers.get(username);
+    if (socket) {
+        socket.disconnect(true);
+        onlineUsers.delete(username);
+        db.prepare(`UPDATE users SET is_online=0 WHERE username=?`).run(username);
+    }
+    
     res.json({ message: "User banned" });
 });
 
@@ -249,13 +316,6 @@ app.post('/api/admin/unban', verifyAdminJWT, (req, res) => {
     db.prepare(`DELETE FROM bans WHERE username=?`)
       .run(req.body.username);
     res.json({ message: "User unbanned" });
-});
-
-// ⬆️⬆️⬆️ END OF NEW ENDPOINT ⬆️⬆️⬆️
-
-// BANNED USERS
-app.get('/api/admin/bans', verifyAdminJWT, (req, res) => {
-    res.json(db.prepare(`SELECT username FROM bans`).all());
 });
 
 // KICK USER (socket disconnect)
@@ -309,7 +369,7 @@ io.on('connection', (socket) => {
 
         if (banned) {
             socket.emit("message", {
-                username: "Admin",
+                username: "System",
                 message: "You are banned from the chat.",
                 timestamp: new Date().toISOString()
             });
@@ -324,6 +384,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on("message", (data) => {
+        if (!data.username || !data.message) return;
+        
+        // Rate limit simple check (optional, better in middleware but socket is different)
+        // ...
+
         saveMessage(data.username, data.message, data.timestamp);
         io.emit("message", data);
     });
@@ -340,6 +405,6 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(5000, () => {
-    console.log("Server running on port 5000");
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

@@ -29,15 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
 
-        // -----------------------------------
-        // MASTER ADMIN LOCAL DEV LOGIN (KEEP)
-        // -----------------------------------
-        if (username === 'Admin' && password === 'testpass231') {
-            localStorage.setItem('username', username);
-            localStorage.setItem('isAdmin', true);
-            window.location.href = 'chat.html';
-            return;
-        }
+
 
         // -------------------------
         // NORMAL USER LOGIN
