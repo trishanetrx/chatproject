@@ -93,7 +93,9 @@ const app = express();
 const server = http.createServer(app);
 
 // Security Headers
-app.use(helmet());
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // CORS
 const allowedOrigins = [
