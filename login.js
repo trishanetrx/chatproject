@@ -1,4 +1,6 @@
-const apiUrl = 'https://chatapi.copythingz.shop/api'; // Backend base URL
+// Determine API URL based on environment
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const apiUrl = isLocal ? 'http://localhost:5000/api' : 'https://chatapi.copythingz.shop/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
@@ -6,6 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordIcon = document.getElementById('passwordIcon');
     const captchaImage = document.getElementById('captchaImage');
     const refreshCaptchaBtn = document.getElementById('refreshCaptcha');
+
+    // Initial Captcha Load
+    if (captchaImage) {
+        captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
+    }
 
     // -------------------------
     // Password show/hide toggle
