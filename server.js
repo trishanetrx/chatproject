@@ -10,11 +10,14 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const svgCaptcha = require('svg-captcha');
+const cookieParser = require('cookie-parser');
 
 // Environment Variables
 const PORT = process.env.PORT || 5000;
 const DB_PATH = process.env.DB_PATH || './database/chat.db';
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_please_change';
+const COOKIE_SECRET = process.env.COOKIE_SECRET || 'cookie_secret_change_me';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
@@ -120,6 +123,7 @@ app.use(cors({
 // Handle preflight requests
 app.options('*', cors());
 
+app.use(cookieParser(COOKIE_SECRET));
 app.use(bodyParser.json());
 
 // Rate Limiting
@@ -129,6 +133,31 @@ const apiLimiter = rateLimit({
     message: "Too many requests from this IP, please try again later."
 });
 app.use('/api/', apiLimiter);
+
+// -----------------------------------------
+// CAPTCHA
+// -----------------------------------------
+app.get('/api/captcha', (req, res) => {
+    const captcha = svgCaptcha.create({
+        size: 5,
+        noise: 2,
+        color: true,
+        background: '#1e1b4b', // Dark Navy
+        width: 150,
+        height: 50,
+        fontSize: 50
+    });
+
+    res.cookie('captcha', captcha.text, {
+        maxAge: 1000 * 60 * 10, // 10 mins
+        httpOnly: true,
+        signed: true,
+        sameSite: 'strict'
+    });
+
+    res.type('svg');
+    res.status(200).send(captcha.data);
+});
 
 // -----------------------------------------
 // ADMIN LOGIN (JWT)
@@ -180,7 +209,11 @@ function verifyAdminJWT(req, res, next) {
 // USER REGISTER
 // -----------------------------------------
 app.post('/api/register', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, captcha } = req.body;
+
+    if (!req.signedCookies.captcha || req.signedCookies.captcha !== captcha) {
+        return res.status(400).json({ message: "Invalid CAPTCHA. Please try again." });
+    }
 
     if (!username || !password)
         return res.status(400).json({ message: "Missing username or password" });
@@ -196,6 +229,7 @@ app.post('/api/register', (req, res) => {
         db.prepare(`INSERT INTO users (username, password) VALUES (?, ?)`)
             .run(username, hashed);
 
+        res.clearCookie('captcha'); // Clear captcha after success
         res.json({ message: "User registered" });
     } catch (err) {
         if (err.message.includes("UNIQUE")) {
@@ -210,7 +244,11 @@ app.post('/api/register', (req, res) => {
 // USER LOGIN
 // -----------------------------------------
 app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, captcha } = req.body;
+
+    if (!req.signedCookies.captcha || req.signedCookies.captcha !== captcha) {
+        return res.status(400).json({ message: "Invalid CAPTCHA. Please try again." });
+    }
 
     const user = db.prepare(`SELECT * FROM users WHERE username=?`).get(username);
 
@@ -230,6 +268,7 @@ app.post('/api/login', (req, res) => {
     const banned = db.prepare(`SELECT username FROM bans WHERE username=?`).get(username);
     if (banned) return res.status(403).json({ message: "User is banned" });
 
+    res.clearCookie('captcha'); // Clear captcha after success
     res.json({
         message: "Login successful",
         username: user.username,
