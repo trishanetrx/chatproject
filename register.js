@@ -63,6 +63,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password, captcha }),
+            credentials: 'include' // Important for CORS cookies
         });
 
         const data = await response.json();

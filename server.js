@@ -134,6 +134,9 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// Trust Proxy for secure cookies behind Nginx/Netlify
+app.set('trust proxy', 1);
+
 // -----------------------------------------
 // CAPTCHA
 // -----------------------------------------
@@ -152,7 +155,8 @@ app.get('/api/captcha', (req, res) => {
         maxAge: 1000 * 60 * 10, // 10 mins
         httpOnly: true,
         signed: true,
-        sameSite: 'strict'
+        sameSite: 'none', // Required for cross-site (Netlify -> Ubuntu)
+        secure: true      // Required for SameSite=None
     });
 
     res.type('svg');
