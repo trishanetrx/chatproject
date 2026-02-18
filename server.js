@@ -250,11 +250,7 @@ app.post('/api/register', (req, res) => {
 // USER LOGIN
 // -----------------------------------------
 app.post('/api/login', (req, res) => {
-    const { username, password, captcha } = req.body;
-
-    if (!req.signedCookies.captcha || req.signedCookies.captcha !== captcha) {
-        return res.status(400).json({ message: "Invalid CAPTCHA. Please try again." });
-    }
+    const { username, password } = req.body;
 
     const user = db.prepare(`SELECT * FROM users WHERE username=?`).get(username);
 

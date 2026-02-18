@@ -6,13 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     const passwordIcon = document.getElementById('passwordIcon');
-    const captchaImage = document.getElementById('captchaImage');
-    const refreshCaptchaBtn = document.getElementById('refreshCaptcha');
-
-    // Initial Captcha Load
-    if (captchaImage) {
-        captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
-    }
 
     // -------------------------
     // Password show/hide toggle
@@ -26,23 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordInput.type = 'password';
                 passwordIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
-        });
-    }
-
-    // -------------------------
-    // REFRESH CAPTCHA
-    // -------------------------
-    if (refreshCaptchaBtn && captchaImage) {
-        refreshCaptchaBtn.addEventListener('click', () => {
-            // Append timestamp to prevent caching
-            // Note: server.js defines /api/captcha, so absolute path is /api/captcha
-            // But login.js uses apiUrl variable. Let's use that if possible BUT 
-            // img src needs to be valid URL. If apiUrl is full URL, use it.
-            // checking login.js line 1: const apiUrl = 'https://chatapi.copythingz.shop/api';
-            // So we should use `${apiUrl}/captcha`
-            captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
-            const captchaInput = document.getElementById('captcha');
-            if (captchaInput) captchaInput.value = '';
         });
     }
 
@@ -68,10 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
-        const captcha = document.getElementById('captcha').value.trim();
 
-        if (!username || !password || !captcha) {
-            showNotification('Please fill in all fields including CAPTCHA.', 'error');
+        if (!username || !password) {
+            showNotification('Please fill in all fields.', 'error');
             return;
         }
 
@@ -82,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, captcha }),
+                body: JSON.stringify({ username, password }),
                 credentials: 'include' // Important for CORS cookies
             });
 
@@ -104,8 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } else {
                 showNotification(data.message || 'Login failed. Please try again.', 'error');
-                // Refresh captcha on failure
-                if (refreshCaptchaBtn) refreshCaptchaBtn.click();
             }
 
         } catch (error) {
