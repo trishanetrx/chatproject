@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     const passwordIcon = document.getElementById('passwordIcon');
+    const captchaImage = document.getElementById('captchaImage');
+    const refreshCaptchaBtn = document.getElementById('refreshCaptcha');
 
     // -------------------------
     // Password show/hide toggle
@@ -21,6 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------
+    // REFRESH CAPTCHA
+    // -------------------------
+    if (refreshCaptchaBtn && captchaImage) {
+        refreshCaptchaBtn.addEventListener('click', () => {
+            // Append timestamp to prevent caching
+            // Note: server.js defines /api/captcha, so absolute path is /api/captcha
+            // But login.js uses apiUrl variable. Let's use that if possible BUT 
+            // img src needs to be valid URL. If apiUrl is full URL, use it.
+            // checking login.js line 1: const apiUrl = 'https://chatapi.copythingz.shop/api';
+            // So we should use `${apiUrl}/captcha`
+            captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
+            const captchaInput = document.getElementById('captcha');
+            if (captchaInput) captchaInput.value = '';
+        });
+    }
+
+    // -------------------------
     // CHECK FOR KICK/BAN REASON
     // -------------------------
     const urlParams = new URLSearchParams(window.location.search);
@@ -28,11 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (reason === 'kicked') {
         showNotification('You have been kicked by an admin.', 'error');
-        // Clean URL
         window.history.replaceState({}, document.title, "login.html");
     } else if (reason === 'banned') {
         showNotification('You have been BANNED by an admin.', 'error');
-        // Clean URL
         window.history.replaceState({}, document.title, "login.html");
     }
 
@@ -44,44 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+        const captcha = document.getElementById('captcha').value.trim();
 
-
-
-        // -------------------------
-        // NORMAL USER LOGIN
-        // -------------------------
-        try {
-            const response = await fetch(`${apiUrl}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Login success
-                showNotification('Login successful! Redirecting...', 'success');
-
-                // Save login session
-                localStorage.setItem('username', data.username);
-                localStorage.setItem('isAdmin', data.isAdmin ? "true" : "false");
-
-                setTimeout(() => {
-                    window.location.href = 'chat.html';
-                }, 1200);
-
-            } else {
-                showNotification(data.message || 'Login failed. Please try again.', 'error');
-            }
-
-        } catch (error) {
-            console.error('Login error:', error);
-            showNotification('Server error. Try again later.', 'error');
+        if (!username || !password || !captcha) {
+            showNotification('Please fill in all fields including CAPTCHA.', 'error');
+            return;
         }
 
-
-
         // -------------------------
         // NORMAL USER LOGIN
         // -------------------------
@@ -89,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username, password, captcha }),
             });
 
             const data = await response.json();
@@ -101,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Save login session
                 localStorage.setItem('username', data.username);
                 localStorage.setItem('isAdmin', data.isAdmin ? "true" : "false");
+                // Dummy token for client-side checks
+                localStorage.setItem('token', 'active_session');
 
                 setTimeout(() => {
                     window.location.href = 'chat.html';
@@ -108,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } else {
                 showNotification(data.message || 'Login failed. Please try again.', 'error');
+                // Refresh captcha on failure
+                if (refreshCaptchaBtn) refreshCaptchaBtn.click();
             }
 
         } catch (error) {

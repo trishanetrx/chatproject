@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     const passwordIcon = document.getElementById('passwordIcon');
+    const captchaImage = document.getElementById('captchaImage');
+    const refreshCaptchaBtn = document.getElementById('refreshCaptcha');
 
     if (toggleButton && passwordInput && passwordIcon) {
         toggleButton.addEventListener('click', () => {
@@ -16,6 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    if (refreshCaptchaBtn && captchaImage) {
+        refreshCaptchaBtn.addEventListener('click', () => {
+            captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
+            const captchaInput = document.getElementById('captcha');
+            if (captchaInput) captchaInput.value = '';
+        });
+    }
 });
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
@@ -24,9 +34,10 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
+    const captcha = document.getElementById('captcha').value.trim();
 
-    if (!username || !password || !confirmPassword) {
-        showNotification('All fields are required.', 'error');
+    if (!username || !password || !confirmPassword || !captcha) {
+        showNotification('All fields including CAPTCHA are required.', 'error');
         return;
     }
 
@@ -44,7 +55,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         const response = await fetch(`${apiUrl}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ username, password, captcha }),
         });
 
         const data = await response.json();
@@ -56,6 +67,8 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             }, 2000);
         } else {
             showNotification(data.message || 'Registration failed.', 'error');
+            const refreshCaptchaBtn = document.getElementById('refreshCaptcha');
+            if (refreshCaptchaBtn) refreshCaptchaBtn.click();
         }
     } catch (error) {
         console.error('Registration error:', error);
