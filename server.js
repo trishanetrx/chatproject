@@ -164,8 +164,10 @@ app.get('/api/captcha', (req, res) => {
         maxAge: 1000 * 60 * 10, // 10 mins
         httpOnly: true,
         signed: true,
-        sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-site in prod, 'lax' for dev
-        secure: isProduction                      // Required only when SameSite=None
+        sameSite: 'none',
+        secure: true,
+        path: '/',
+        domain: isProduction ? '.copythingz.shop' : undefined
     });
 
     res.type('svg');
@@ -224,7 +226,13 @@ function verifyAdminJWT(req, res, next) {
 app.post('/api/register', (req, res) => {
     const { username, password, captcha } = req.body;
 
-    if (!req.signedCookies.captcha || req.signedCookies.captcha !== captcha) {
+    const storedCaptcha = req.signedCookies.captcha;
+
+    if (!storedCaptcha) {
+        return res.status(400).json({ message: "CAPTCHA expired. Please refresh and try again." });
+    }
+
+    if (storedCaptcha !== captcha) {
         return res.status(400).json({ message: "Invalid CAPTCHA. Please try again." });
     }
 
