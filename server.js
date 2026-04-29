@@ -128,7 +128,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Handle preflight requests with same credentials config
-app.options('*', cors(corsOptions));
+app.options('/*', cors(corsOptions));
 
 app.use(cookieParser(COOKIE_SECRET));
 app.use(bodyParser.json());
