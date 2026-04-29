@@ -2,17 +2,40 @@
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const apiUrl = isLocal ? 'http://localhost:5000/api' : 'https://chatapi.copythingz.shop/api';
 
+// Load CAPTCHA via fetch with credentials so the signed cookie is stored by the browser
+async function loadCaptcha() {
+    const captchaImage = document.getElementById('captchaImage');
+    if (!captchaImage) return;
+
+    try {
+        const response = await fetch(`${apiUrl}/captcha?t=${new Date().getTime()}`, {
+            credentials: 'include' // Critical: ensures the captcha cookie is stored cross-origin
+        });
+
+        if (!response.ok) throw new Error('Failed to load CAPTCHA');
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Revoke any previous blob URL to avoid memory leaks
+        if (captchaImage._blobUrl) URL.revokeObjectURL(captchaImage._blobUrl);
+        captchaImage._blobUrl = blobUrl;
+        captchaImage.src = blobUrl;
+    } catch (err) {
+        console.error('CAPTCHA load error:', err);
+        const captchaImage = document.getElementById('captchaImage');
+        if (captchaImage) captchaImage.alt = 'Failed to load CAPTCHA. Click refresh.';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     const passwordIcon = document.getElementById('passwordIcon');
-    const captchaImage = document.getElementById('captchaImage');
     const refreshCaptchaBtn = document.getElementById('refreshCaptcha');
 
     // Initial Captcha Load
-    if (captchaImage) {
-        captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
-    }
+    loadCaptcha();
 
     if (toggleButton && passwordInput && passwordIcon) {
         toggleButton.addEventListener('click', () => {
@@ -26,14 +49,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (refreshCaptchaBtn && captchaImage) {
+    if (refreshCaptchaBtn) {
         refreshCaptchaBtn.addEventListener('click', () => {
-            captchaImage.src = `${apiUrl}/captcha?t=${new Date().getTime()}`;
+            loadCaptcha();
             const captchaInput = document.getElementById('captcha');
             if (captchaInput) captchaInput.value = '';
         });
     }
 });
+
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();

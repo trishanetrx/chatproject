@@ -102,11 +102,14 @@ const allowedOrigins = [
     'https://copythingz.shop',
     'https://chat.copythingz.shop',
     'https://chatapi.copythingz.shop',
-    'http://localhost:3000', // Dev
-    'http://127.0.0.1:5500'  // Dev
+    'http://localhost:3000',   // Dev
+    'http://localhost:5000',   // Dev (API itself)
+    'http://localhost:5500',   // Dev (VS Code Live Server)
+    'http://127.0.0.1:5500',   // Dev (VS Code Live Server alt)
+    'http://127.0.0.1:3000',   // Dev alt
 ];
 
-app.use(cors({
+const corsOptions = {
     origin: (origin, cb) => {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return cb(null, true);
@@ -120,10 +123,12 @@ app.use(cors({
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
-}));
+};
 
-// Handle preflight requests
-app.options('*', cors());
+app.use(cors(corsOptions));
+
+// Handle preflight requests with same credentials config
+app.options('*', cors(corsOptions));
 
 app.use(cookieParser(COOKIE_SECRET));
 app.use(bodyParser.json());
@@ -153,12 +158,14 @@ app.get('/api/captcha', (req, res) => {
         fontSize: 50
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('captcha', captcha.text, {
         maxAge: 1000 * 60 * 10, // 10 mins
         httpOnly: true,
         signed: true,
-        sameSite: 'none', // Required for cross-site (Netlify -> Ubuntu)
-        secure: true      // Required for SameSite=None
+        sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-site in prod, 'lax' for dev
+        secure: isProduction                      // Required only when SameSite=None
     });
 
     res.type('svg');
